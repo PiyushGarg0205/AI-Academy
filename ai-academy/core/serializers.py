@@ -2,6 +2,18 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from .models import Course, Module, Video, MCQ, Profile
+# core/serializers.py
+from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+
+class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    @classmethod
+    def get_token(cls, user):
+        token = super().get_token(user)
+        # Add custom claims
+        token['username'] = user.username
+        token['role'] = user.profile.role # This is the key line
+        return token
+    
 
 # This serializer is correct and should be kept for user registration.
 class UserSerializer(serializers.ModelSerializer):

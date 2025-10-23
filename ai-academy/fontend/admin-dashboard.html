@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Admin Dashboard</h1>
+        
+        <div class="card">
+            <h2>Generate New Course</h2>
+            <form id="generate-form">
+                <input type="text" id="prompt" placeholder="Course Topic (e.g., Learn Javascript)" required>
+                <input type="number" id="num_modules" value="3" required>
+                <button type="submit">Generate</button>
+            </form>
+            <p id="generate-status"></p>
+        </div>
+
+        <div class="card">
+            <h2>Manage Courses</h2>
+            <div id="course-list">
+                </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

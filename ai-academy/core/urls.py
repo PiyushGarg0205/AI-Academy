@@ -5,8 +5,10 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 from .views import (
+    CourseListAPIView,
     RegisterView,
     CourseGenerateAPIView,
+    CourseDetailAPIView
 )
 
 urlpatterns = [
@@ -18,4 +20,8 @@ urlpatterns = [
     # --- Course URLs ---
     path('courses/generate/', CourseGenerateAPIView.as_view(), name='course-generate'),
     # The old 'courses/create/' path has been removed.
+    # core/urls.py
+    path('courses/', CourseListAPIView.as_view(), name='course-list'),
+
+    path('courses/<int:pk>/', CourseDetailAPIView.as_view(), name='course-detail'),
 ]
