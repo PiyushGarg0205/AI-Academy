@@ -4,8 +4,10 @@ asgiref==3.10.0
 cachetools==6.2.1
 certifi==2025.10.5
 charset-normalizer==3.4.4
+defusedxml==0.7.1
 distro==1.9.0
 Django==5.2.7
+django-cors-headers==4.9.0
 djangorestframework==3.16.1
 djangorestframework_simplejwt==5.5.1
 google-ai-generativelanguage==0.6.15
@@ -42,3 +44,4 @@ typing-inspection==0.4.2
 typing_extensions==4.15.0
 uritemplate==4.2.0
 urllib3==2.5.0
+youtube-transcript-api==1.2.3
