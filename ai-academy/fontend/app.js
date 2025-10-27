@@ -15,6 +15,17 @@ document.addEventListener('DOMContentLoaded', () => {
     } else if (pageTitle.includes('Student Dashboard')) {
         setupStudentDashboard();
     }
+
+    // Attach global event listeners
+    const themeToggler = document.querySelector('.toggle-switch');
+    if (themeToggler) themeToggler.addEventListener('click', toggleTheme);
+
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+    if (mobileMenuBtn) mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+
+    // Set theme on initial load
+    const savedTheme = localStorage.getItem('theme') || 'dark';
+    document.documentElement.setAttribute('data-theme', savedTheme);
 });
 
 
@@ -23,6 +34,8 @@ document.addEventListener('DOMContentLoaded', () => {
 // =====================================================================
 function setupLoginPage() {
     const loginForm = document.getElementById('login-form');
+    if (!loginForm) return;
+
     loginForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         const username = document.getElementById('username').value;
@@ -42,10 +55,9 @@ function setupLoginPage() {
             const data = await response.json();
             localStorage.setItem('accessToken', data.access);
 
-            // Decode the token to get the user's role
+            // Decode token to get user's role (requires backend customization)
             const payload = JSON.parse(atob(data.access.split('.')[1]));
 
-            // Redirect based on the user's role
             if (payload.role === 'ADMIN') {
                 window.location.href = 'admin-dashboard.html';
             } else {
@@ -54,6 +66,7 @@ function setupLoginPage() {
 
         } catch (error) {
             errorMessage.textContent = error.message;
+            errorMessage.style.display = 'block';
         }
     });
 }
@@ -73,7 +86,6 @@ async function setupAdminDashboard() {
     const generateForm = document.getElementById('generate-form');
     const generateStatus = document.getElementById('generate-status');
 
-    // Fetches and displays all courses (drafts and published)
     async function loadCourses() {
         try {
             const response = await fetch(`${API_BASE_URL}/courses/`, {
@@ -84,21 +96,24 @@ async function setupAdminDashboard() {
             courseListDiv.innerHTML = '';
             courses.forEach(course => {
                 const courseEl = document.createElement('div');
-                courseEl.className = 'course-item';
+                courseEl.className = 'course-item'; // Use a class for styling
                 courseEl.innerHTML = `
-                    <h3>${course.title}</h3>
-                    <p>Status: <strong class="${course.status.toLowerCase()}">${course.status}</strong></p>
-                    <button onclick="publishCourse(${course.id})" ${course.status === 'PUBLISHED' ? 'disabled' : ''}>Publish</button>
-                    <button onclick="editCourse(${course.id})">Edit</button>
+                    <div class="course-info">
+                        <p class="course-title">${course.title}</p>
+                        <p class="course-details">Status: <strong class="${course.status.toLowerCase()}">${course.status}</strong></p>
+                    </div>
+                    <div class="course-actions">
+                        <button onclick="publishCourse(${course.id})" ${course.status === 'PUBLISHED' ? 'disabled' : ''}>Publish</button>
+                        <button onclick="editCourse(${course.id})">Edit</button>
+                    </div>
                 `;
                 courseListDiv.appendChild(courseEl);
             });
         } catch (error) {
-            courseListDiv.innerHTML = `<p class="error">Failed to load courses. Please try again.</p>`;
+            courseListDiv.innerHTML = `<p class="error">Failed to load courses.</p>`;
         }
     }
 
-    // Publishes a course by sending a PATCH request
     window.publishCourse = async function(courseId) {
         if (!confirm('Are you sure you want to publish this course?')) return;
         
@@ -110,20 +125,16 @@ async function setupAdminDashboard() {
             },
             body: JSON.stringify({ status: 'PUBLISHED' })
         });
-        loadCourses(); // Refresh the list
+        loadCourses();
     }
     
-    // Placeholder for future edit functionality
     window.editCourse = function(courseId) {
-        alert(`Edit functionality for course ID ${courseId} is the next major feature to build.`);
-        // window.location.href = `edit-course.html?id=${courseId}`;
+        alert(`Edit functionality for course ID ${courseId} will be implemented later.`);
     }
 
-    // Handles the course generation form submission
     generateForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         generateStatus.textContent = '🤖 Generating course... This may take a minute.';
-        generateStatus.className = 'status-message';
         
         const prompt = document.getElementById('prompt').value;
         const num_modules = document.getElementById('num_modules').value;
@@ -141,16 +152,14 @@ async function setupAdminDashboard() {
             }
 
             generateStatus.textContent = '✅ Course generated successfully!';
-            generateStatus.className = 'status-message success';
             generateForm.reset();
             loadCourses();
         } catch (error) {
             generateStatus.textContent = `❌ Error: ${error.message}`;
-            generateStatus.className = 'status-message error';
         }
     });
 
-    loadCourses(); // Initial load of courses
+    loadCourses();
 }
 
 
@@ -164,110 +173,193 @@ function setupStudentDashboard() {
         return;
     }
 
-    const publishedCoursesDiv = document.getElementById('published-courses');
-    const courseViewerDiv = document.getElementById('course-viewer');
+    const courseListView = document.getElementById('course-list-view');
+    const courseViewer = document.getElementById('course-viewer');
+    
+    let allLessons = [];
+    let currentLessonIndex = -1;
 
-    // Fetches all courses and filters for only PUBLISHED ones
     async function loadPublishedCourses() {
-        const response = await fetch(`${API_BASE_URL}/courses/`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const allCourses = await response.json();
-        const published = allCourses.filter(c => c.status === 'PUBLISHED');
+        try {
+            const response = await fetch(`${API_BASE_URL}/courses/`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!response.ok) throw new Error('Could not fetch courses.');
+            
+            const courses = await response.json();
+            const published = courses.filter(c => c.status === 'PUBLISHED');
 
-        publishedCoursesDiv.innerHTML = '<h2>Click a course to begin:</h2>';
-        if (published.length === 0) {
-            publishedCoursesDiv.innerHTML += '<p>No courses are available yet. Check back later!</p>';
+            const courseListContainer = document.getElementById('published-courses');
+            courseListContainer.innerHTML = '';
+
+            if (published.length === 0) {
+                courseListContainer.innerHTML = '<p>No courses are available yet.</p>';
+                return;
+            }
+
+            published.forEach(course => {
+                const courseCard = document.createElement('div');
+                courseCard.className = 'course-card';
+                courseCard.onclick = () => viewCourse(course.id);
+                courseCard.innerHTML = `
+                    <h3>${course.title}</h3>
+                    <p>${course.description || 'A new course awaits.'}</p>
+                    <div class="course-meta">
+                        <span><i class="fas fa-layer-group"></i> ${course.modules.length} Modules</span>
+                        <span><i class="fas fa-user"></i> ${course.creator_username || 'Admin'}</span>
+                    </div>
+                `;
+                courseListContainer.appendChild(courseCard);
+            });
+        } catch (error) {
+            document.getElementById('published-courses').innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+        }
+    }
+
+    async function viewCourse(courseId) {
+        try {
+            const response = await fetch(`${API_BASE_URL}/courses/${courseId}/`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!response.ok) throw new Error('Could not load the selected course.');
+            const course = await response.json();
+
+            courseListView.style.display = 'none';
+            courseViewer.style.display = 'grid';
+
+            renderCourseViewer(course);
+        } catch (error) {
+            alert(`Error loading course: ${error.message}`);
+        }
+    }
+
+    function renderCourseViewer(course) {
+        document.getElementById('course-title-sidebar').textContent = course.title;
+        const moduleList = document.getElementById('module-list');
+        moduleList.innerHTML = '';
+        allLessons = [];
+
+        (course.modules || []).forEach(module => {
+            const moduleEl = document.createElement('div');
+            moduleEl.className = 'module';
+            let lessonsHtml = '';
+            (module.lessons || []).forEach(lesson => {
+                const lessonIndex = allLessons.length;
+                allLessons.push(lesson);
+                lessonsHtml += `
+                    <li class="lesson-list-item" id="sidebar-lesson-${lessonIndex}">
+                        <a href="#" onclick="event.preventDefault(); renderLesson(${lessonIndex})">${lesson.title}</a>
+                    </li>
+                `;
+            });
+            moduleEl.innerHTML = `
+                <div class="module-header">${module.title} <i class="fas fa-chevron-down"></i></div>
+                <ul class="lesson-list">${lessonsHtml}</ul>
+            `;
+            moduleList.appendChild(moduleEl);
+            moduleEl.querySelector('.module-header').onclick = () => moduleEl.classList.toggle('active');
+        });
+
+        if (allLessons.length > 0) {
+            renderLesson(0);
+        } else {
+             document.getElementById('lesson-viewer-content').innerHTML = '<h2>This course has no lessons.</h2>';
+        }
+    }
+
+    function renderLesson(lessonIndex) {
+        currentLessonIndex = lessonIndex;
+        const lesson = allLessons[lessonIndex];
+        
+        document.getElementById('lesson-title').textContent = lesson.title;
+        
+        const videoContainer = document.getElementById('video-container');
+        if (lesson.video_id) {
+            videoContainer.style.display = 'block';
+            videoContainer.innerHTML = `<iframe src="https://www.youtube.com/embed/${lesson.video_id}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>`;
+        } else {
+            videoContainer.style.display = 'none';
+        }
+
+        document.getElementById('text-content').innerHTML = lesson.content || '';
+
+        const mcqContainer = document.getElementById('mcq-container');
+        if (lesson.mcq_question && lesson.mcq_options) {
+            mcqContainer.style.display = 'block';
+            document.getElementById('mcq-question').textContent = lesson.mcq_question;
+            document.getElementById('mcq-options').innerHTML = (lesson.mcq_options || []).map((opt, i) => `
+                <div class="mcq-option">
+                    <input type="radio" id="opt-${i}" name="mcq" value="${opt}" required>
+                    <label for="opt-${i}">${opt}</label>
+                </div>
+            `).join('');
+            
+            document.getElementById('mcq-form').reset();
+            document.getElementById('mcq-feedback').style.display = 'none';
+            document.querySelector('#mcq-form button').disabled = false;
+
+        } else {
+            mcqContainer.style.display = 'none';
+        }
+
+        document.querySelectorAll('.lesson-list-item').forEach(el => el.classList.remove('active'));
+        document.getElementById(`sidebar-lesson-${lessonIndex}`).classList.add('active');
+
+        document.getElementById('prev-lesson-btn').disabled = (lessonIndex === 0);
+        document.getElementById('next-lesson-btn').disabled = (lessonIndex === allLessons.length - 1);
+    }
+    
+    document.getElementById('next-lesson-btn').onclick = () => {
+        if (currentLessonIndex < allLessons.length - 1) renderLesson(currentLessonIndex + 1);
+    };
+    document.getElementById('prev-lesson-btn').onclick = () => {
+        if (currentLessonIndex > 0) renderLesson(currentLessonIndex - 1);
+    };
+
+    document.getElementById('mcq-form').addEventListener('submit', (event) => {
+        event.preventDefault(); 
+        const feedbackEl = document.getElementById('mcq-feedback');
+        const selectedOption = document.querySelector('input[name="mcq"]:checked');
+
+        if (!selectedOption) {
+            alert('Please select an answer!');
             return;
         }
 
-        published.forEach(course => {
-            const courseBtn = document.createElement('button');
-            courseBtn.textContent = course.title;
-            courseBtn.onclick = () => viewCourse(course.id);
-            publishedCoursesDiv.appendChild(courseBtn);
-        });
-    }
+        const userAnswer = selectedOption.value;
+        const correctAnswer = allLessons[currentLessonIndex].mcq_correct_answer;
 
-    // Fetches and displays the content of a single selected course
-    window.viewCourse = async function(courseId) {
-        const response = await fetch(`${API_BASE_URL}/courses/${courseId}/`, {
-            headers: { 'Authorization': `Bearer ${token}` }
-        });
-        const course = await response.json();
+        feedbackEl.style.display = 'block';
 
-        let html = `<h1>${course.title}</h1>`;
-        
-        // **ROBUSTNESS FIX:** Use (course.modules || []) to prevent errors if modules are missing.
-        (course.modules || []).forEach(module => {
-            html += `<h2 class="module-title">${module.title}</h2>`;
-            
-            // **ROBUSTNESS FIX:** Use (module.videos || []) to prevent errors if videos are missing.
-            (module.videos || []).forEach(video => {
-                const videoId = video.url.split('v=')[1];
-                html += `
-                    <div class="video-item">
-                        <h3>${video.title}</h3>
-                        <div class="video-container">
-                           <iframe src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>
-                        </div>
-                        <h4>Quiz for this video:</h4>
-                        <form class="quiz-form">
-                            ${(video.mcqs || []).map((mcq, i) => `
-                                <fieldset>
-                                    <legend>${i + 1}. ${mcq.question}</legend>
-                                    ${(mcq.options || []).map(opt => `
-                                        <div>
-                                            <input type="radio" id="mcq-${mcq.id}-${opt}" name="mcq-${mcq.id}" value="${opt}">
-                                            <label for="mcq-${mcq.id}-${opt}">${opt}</label>
-                                        </div>
-                                    `).join('')}
-                                </fieldset>
-                            `).join('')}
-                        </form>
-                    </div>
-                `;
-            });
-        });
-        courseViewerDiv.innerHTML = html;
-    }
+        if (userAnswer === correctAnswer) {
+            feedbackEl.textContent = '✅ Correct! Well done.';
+            feedbackEl.className = 'correct';
+        } else {
+            feedbackEl.textContent = `❌ Not quite. The correct answer is: "${correctAnswer}"`;
+            feedbackEl.className = 'incorrect';
+        }
 
-    loadPublishedCourses(); // Initial load of courses
+        event.target.querySelector('button').disabled = true;
+    });
+    
+    loadPublishedCourses();
 }
-// Keep this code for smooth scrolling on the landing page
-document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
-  anchor.addEventListener("click", function (e) {
-    e.preventDefault();
-    const target = document.querySelector(this.getAttribute("href"));
-    if (target) {
-      window.scrollTo({
-        top: target.offsetTop - 70, // Adjust navbar height if needed
-        behavior: "smooth",
-      });
-    }
-  });
-});
 
-// The modal functions are no longer needed and can be deleted.
-// Add this function to your app.js file
+
+// =====================================================================
+//  GLOBAL HELPER FUNCTIONS
+// =====================================================================
 
 function toggleMobileMenu() {
     const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
     const mobileMenu = document.querySelector('.mobile-menu');
-    
     mobileMenuBtn.classList.toggle('active');
     mobileMenu.classList.toggle('active');
 }
-// Add this function to your app.js file
+
 function toggleTheme() {
     const doc = document.documentElement;
-    const currentTheme = doc.getAttribute('data-theme');
-    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    const newTheme = doc.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     doc.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme); // Save the choice
+    localStorage.setItem('theme', newTheme);
 }
-// Add this code to run when the page loads
-document.addEventListener('DOMContentLoaded', () => {
-    const savedTheme = localStorage.getItem('theme') || 'dark'; // Default to dark
-    document.documentElement.setAttribute('data-theme', savedTheme);
-});

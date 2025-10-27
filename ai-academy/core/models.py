@@ -59,3 +59,21 @@ class MCQ(models.Model):
 
     def __str__(self):
         return self.question[:50]
+    
+class Lesson(models.Model):
+    module = models.ForeignKey(Module, on_delete=models.CASCADE, related_name='lessons')
+    title = models.CharField(max_length=255)
+    content = models.TextField() # The main text content
+    order = models.PositiveIntegerField(default=0)
+
+    # --- NEW FIELDS ---
+    video_id = models.CharField(max_length=100, blank=True, null=True) # Optional YouTube video ID
+    mcq_question = models.TextField(blank=True, null=True)
+    mcq_options = models.JSONField(blank=True, null=True) # Will store a list like ["A", "B", "C"]
+    mcq_correct_answer = models.CharField(max_length=255, blank=True, null=True)
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return self.title
