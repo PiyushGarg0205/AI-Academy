@@ -1,22 +1,29 @@
-# core/serializers.py
 from rest_framework import serializers
 from django.contrib.auth.models import User
-from .models import Course, Module, Video, MCQ, Profile
-# core/serializers.py
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
+from .models import Course, Module, Lesson, Profile
+
+# =====================================================================
+#  AUTHENTICATION & USER SERIALIZERS
+# =====================================================================
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
+    """
+    Customizes the JWT token to include the user's role.
+    """
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
         # Add custom claims
         token['username'] = user.username
-        token['role'] = user.profile.role # This is the key line
+        # Add role from the user's profile
+        token['role'] = user.profile.role 
         return token
-    
 
-# This serializer is correct and should be kept for user registration.
 class UserSerializer(serializers.ModelSerializer):
+    """
+    Handles user registration, creating both a User and a Profile.
+    """
     class Meta:
         model = User
         fields = ["id", "username", "email", "password"]
@@ -25,43 +32,62 @@ class UserSerializer(serializers.ModelSerializer):
     def create(self, validated_data):
         user = User.objects.create_user(
             username=validated_data['username'],
-            email=validated_data['email'],
+            email=validated_data.get('email', ''),
             password=validated_data['password']
         )
+        # Automatically create a student profile for the new user
         Profile.objects.create(user=user, role=Profile.Role.STUDENT)
         return user
 
 # =====================================================================
-# ADD THE NEW NESTED SERIALIZERS BELOW
+#  NESTED SERIALIZERS FOR COURSE STRUCTURE
 # =====================================================================
 
-class MCQSerializer(serializers.ModelSerializer):
-    """Serializes a single MCQ object."""
+class LessonSerializer(serializers.ModelSerializer):
+    """
+    Serializes a single Lesson, including its content, video, and MCQ data.
+    This is the deepest level of nesting.
+    """
     class Meta:
-        model = MCQ
-        fields = ['id', 'question', 'options', 'correct_answer']
-
-class VideoSerializer(serializers.ModelSerializer):
-    """Serializes a Video, nesting all its related MCQs inside."""
-    mcqs = MCQSerializer(many=True, read_only=True) # Nests a list of MCQs
-
-    class Meta:
-        model = Video
-        fields = ['id', 'title', 'url', 'mcqs']
+        model = Lesson
+        fields = [
+            'id', 
+            'title', 
+            'content', 
+            'video_id', 
+            'mcq_question', 
+            'mcq_options', 
+            'mcq_correct_answer',
+            'order'
+        ]
 
 class ModuleSerializer(serializers.ModelSerializer):
-    """Serializes a Module, nesting all its related Videos inside."""
-    videos = VideoSerializer(many=True, read_only=True) # Nests a list of Videos
+    """
+    Serializes a Module, nesting all of its related Lessons inside.
+    """
+    # This is the key part: it nests a list of Lessons.
+    lessons = LessonSerializer(many=True, read_only=True) 
 
     class Meta:
         model = Module
-        fields = ['id', 'title', 'order', 'videos']
+        fields = ['id', 'title', 'order', 'lessons']
 
 class CourseDetailSerializer(serializers.ModelSerializer):
-    """The main serializer that represents the entire course structure."""
-    modules = ModuleSerializer(many=True, read_only=True) # Nests a list of Modules
-    created_by = serializers.StringRelatedField(read_only=True)
+    """
+    The main serializer that represents the entire course,
+    nesting all of its Modules (which in turn nest their Lessons).
+    """
+    # This nests a list of Modules.
+    modules = ModuleSerializer(many=True, read_only=True) 
+    # Provides the username of the course creator.
+    creator_username = serializers.CharField(source='created_by.username', read_only=True)
 
     class Meta:
         model = Course
-        fields = ['id', 'title', 'status', 'created_by', 'modules']
+        fields = [
+            'id', 
+            'title', 
+            'status', 
+            'creator_username', 
+            'modules'
+        ]
