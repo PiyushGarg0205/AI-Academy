@@ -1,19 +1,283 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <title>Student Dashboard</title>
-    <link rel="stylesheet" href="styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - CourseCraft</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* ...............................................
+        CSS VARIABLES & THEME SETUP
+        ...............................................*/
+        :root {
+          --bg-primary: #02021e;
+          --bg-secondary: rgba(29, 29, 52, 0.95);
+          --bg-card: rgba(255, 255, 255, 0.05);
+          --bg-card-hover: rgba(255, 255, 255, 0.08);
+          --text-primary: #ffffff;
+          --text-secondary: rgba(255, 255, 255, 0.8);
+          --text-muted: rgba(255, 255, 255, 0.6);
+          --border-color: rgba(255, 255, 255, 0.1);
+          --border-hover: rgba(255, 255, 255, 0.2);
+          --nav-bg: rgba(10, 10, 15, 0.85);
+          --nav-bg-scroll: rgba(10, 10, 15, 0.95);
+          --accent-gradient: linear-gradient(135deg, #c41af3, #4800f0, #4800f0);
+          --light-bg-card: rgba(0, 0, 0, 0.05);
+          --logo-col: white;
+        }
+
+        [data-theme="light"] {
+          --bg-primary: #ffffff;
+          --bg-secondary: rgba(255, 255, 255, 0.95);
+          --bg-card: #f8f9ff;
+          --bg-card-hover: #f0f4ff;
+          --text-primary: #1a1a1a;
+          --text-secondary: #404040;
+          --text-muted: #666666;
+          --border-color: rgba(0, 0, 0, 0.1);
+          --border-hover: rgba(0, 0, 0, 0.2);
+          --nav-bg: rgba(255, 255, 255, 0.85);
+          --nav-bg-scroll: rgba(255, 255, 255, 0.95);
+          --accent-gradient: linear-gradient(135deg, #4800f0, #4800f0, #c41af3);
+          --light-bg-card: #f8f9ff;
+          --logo-col: black;
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: "Inter", -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg-primary); color: var(--text-primary); overflow-x: hidden; transition: background-color 0.3s ease, color 0.3s ease; line-height: 1.6; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 20px; }
+
+        /* HEADER & NAVIGATION */
+        header { position: sticky; top: 0; z-index: 1000; }
+        nav { position: fixed; top: 0; width: 100%; z-index: 1000; background: var(--nav-bg); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color); transition: background-color 0.3s ease, border-color 0.3s ease; }
+        .nav-container { display: flex; align-items: center; justify-content: space-between; padding: 1rem 2rem; }
+        .nav-items { display: flex; align-items: center; gap: 2rem; }
+        .logo { display: flex; align-items: center; gap: 0.5rem; font-size: 1.5rem; font-weight: 800; text-decoration: none; transition: transform 0.3s ease; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .logo-box { background: linear-gradient(135deg, #9d00ff, #6200ff, #0033ff); border-radius: 15px; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; padding: 4px; color: var(--logo-col); }
+        .logo:hover { transform: scale(1.02); }
+        .nav-center { display: flex; align-items: center; gap: 3rem; }
+        .nav-links { display: flex; align-items: center; list-style: none; gap: 1.5rem; }
+        .nav-links a { color: var(--text-secondary); text-decoration: none; font-weight: 500; padding: 0.2rem 0; transition: all 0.3s ease; position: relative; }
+        .nav-links a.active-nav, .nav-links a:hover { color: var(--text-primary); }
+        .nav-links a::after { content: ""; position: absolute; width: 0; height: 2px; bottom: -2px; left: 50%; transform: translateX(-50%); background: var(--accent-gradient); transition: width 0.3s ease-out; }
+        .nav-links a:hover::after, .nav-links a.active-nav::after { width: 100%; }
+
+        /* MOBILE MENU */
+        .mobile-menu-btn { display: none; flex-direction: column; cursor: pointer; gap: 5px; z-index: 1001; background: transparent; border: none; padding: 5px; }
+        .mobile-menu-btn span { width: 25px; height: 3px; background: var(--text-primary); transition: 0.3s; border-radius: 3px; }
+        .mobile-menu-btn.active span:nth-child(1) { transform: rotate(-45deg) translate(-5px, 6px); }
+        .mobile-menu-btn.active span:nth-child(2) { opacity: 0; }
+        .mobile-menu-btn.active span:nth-child(3) { transform: rotate(45deg) translate(-5px, -6px); }
+        .mobile-menu { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-secondary); backdrop-filter: blur(20px); z-index: 999; flex-direction: column; align-items: center; justify-content: flex-start; padding-top: 6rem; transform: translateX(-100%); transition: transform 0.4s ease-in-out; }
+        .mobile-menu.active { display: flex; transform: translateX(0); }
+        .mobile-menu-links { list-style: none; text-align: center; padding: 0; }
+        .mobile-menu-links li { margin: 1.5rem 0; }
+        .mobile-menu-links a { font-size: 1.5rem; font-weight: 700; color: var(--text-primary); text-decoration: none; }
+        .mobile-menu-buttons { display: flex; flex-direction: column; gap: 1rem; margin-top: 2rem; width: 80%; max-width: 300px; }
+
+        /* THEME TOGGLE */
+        .theme-toggle { display: flex; align-items: center; gap: 0.5rem; }
+        .toggle-switch { position: relative; width: 50px; height: 25px; background: var(--bg-card); border-radius: 25px; border: 1px solid var(--border-color); cursor: pointer; }
+        .toggle-slider { position: absolute; top: 2px; left: 2px; width: 19px; height: 19px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 50%; transition: transform 0.3s ease; }
+        [data-theme="light"] .toggle-slider { transform: translateX(25px); }
+
+        /* BUTTONS */
+        .nav-actions { display: flex; align-items: center; gap: 1rem; }
+        .btn { padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.3s ease; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; }
+        .btn-primary { background: var(--accent-gradient); color: white; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3); }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(37, 99, 235, 0.4); }
+        .btn-secondary { background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-color); }
+        .btn-secondary:hover { background: var(--bg-card-hover); border-color: var(--border-hover); }
+
+        /* MAIN DASHBOARD CONTENT */
+        .dashboard-main { padding: 120px 0 5rem; min-height: 100vh; }
+        .dashboard-header { margin-bottom: 3rem; }
+        .dashboard-header h1 { font-size: 2.5rem; font-weight: 700; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .course-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+        .course-card { background: var(--bg-card); border-radius: 15px; padding: 1.5rem; border: 1px solid var(--border-color); transition: all 0.3s ease; cursor: pointer; }
+        .course-card:hover { transform: translateY(-5px); box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1); background: var(--bg-card-hover); border-color: var(--border-hover); }
+        .course-card h3 { font-size: 1.25rem; margin-bottom: 0.5rem; color: var(--text-primary); }
+        .course-card p { color: var(--text-secondary); font-size: 0.95rem; }
+        .course-meta { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: var(--text-muted); margin-top: 1.5rem; }
+        .course-meta span { display: flex; align-items: center; gap: 0.3rem; }
+        .course-viewer-section { margin-top: 4rem; padding: 3rem; background: var(--bg-card); border: 1px dashed var(--border-color); border-radius: 15px; text-align: center; color: var(--text-muted); }
+
+        /* FOOTER STYLES */
+        .footer { background: var(--bg-card); color: var(--text-primary); padding: 4rem 2rem; }
+        .footer-container { display: grid; grid-template-columns: 2fr 1fr; gap: 3rem; max-width: 1200px; margin: auto; }
+        .footer-left h2 { font-size: 2rem; margin-bottom: 1rem; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .footer-intro { color: var(--text-secondary); margin-bottom: 2rem; line-height: 1.7; font-size: 1.1rem; }
+        .footer-socials a { margin-right: 1rem; color: var(--text-primary); font-size: 1.2rem; transition: color 0.3s; }
+        .footer-right { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        .footer-right ul { list-style: none; padding: 0; }
+        .footer-right li { margin-bottom: 0.8rem; }
+        .footer-right a { color: var(--text-secondary); text-decoration: none; transition: color 0.3s; }
+        .footer-right a:hover { color: var(--text-primary); }
+        .footer-bottom { text-align: center; margin-top: 2rem; border-top: 1px solid var(--border-color); padding-top: 1rem; font-size: 0.9rem; color: var(--text-muted); }
+
+        /* RESPONSIVE DESIGN */
+        @media (max-width: 991px) {
+          .nav-center, .nav-actions { display: none; }
+          .mobile-menu-btn { display: flex; }
+          .nav-container { padding: 1rem; }
+        }
+        @media (max-width: 900px) {
+          .footer-container { grid-template-columns: 1fr; text-align: center; }
+        }
+        @media (max-width: 600px) {
+            .footer-right { grid-template-columns: 1fr; }
+        }
+    </style>
 </head>
-<body>
-    <div class="container">
-        <h1>Available Courses</h1>
-        <div id="published-courses">
+<body data-theme="dark">
+    
+    <header>
+      <nav>
+        <div class="nav-container container">
+          <a href="index.html" class="logo" aria-label="CourseCraft Home">
+            <div class="logo-box">
+              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44a2.5 2.5 0 0 1-2.96-3.08a3 3 0 0 1-.34-5.58a2.5 2.5 0 0 1 1.32-4.24a2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Zm5 0A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44a2.5 2.5 0 0 0 2.96-3.08a3 3 0 0 0 .34-5.58a2.5 2.5 0 0 0-1.32-4.24a2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>
             </div>
-        <hr>
-        <div id="course-viewer">
+            <span>CourseCraft</span>
+          </a>
+
+          <div class="nav-center">
+            <ul class="nav-links">
+  <li><a href="student-dashboard.html">Home</a></li> 
+  <li><a href="#" class="active-nav">Dashboard</a></li>
+  <li><a href="profile.html">Profile</a></li>
+</ul>
+          </div>
+
+          <div class="nav-items">
+            <div class="theme-toggle">
+              <span class="theme-icon">🌙</span>
+              <button class="toggle-switch" type="button" onclick="toggleTheme()"><span class="toggle-slider"></span></button>
+              <span class="theme-icon">☀️</span>
             </div>
+            <div class="nav-actions">
+                <button class="btn btn-secondary" onclick="handleLogout()">Logout</button>
+            </div>
+          </div>
+
+          <button class="mobile-menu-btn" type="button" aria-label="Toggle mobile menu"><span></span><span></span><span></span></button>
+        </div>
+      </nav>
+    </header>
+
+    <div class="mobile-menu">
+        <ul class="mobile-menu-links">
+            <li><a href="index.html" onclick="toggleMobileMenu()">Home</a></li>
+            <li><a href="#" onclick="toggleMobileMenu()">Dashboard</a></li>
+            <li><a href="profile.html" onclick="toggleMobileMenu()">Profile</a></li>
+        </ul>
+        <div class="mobile-menu-buttons">
+            <button class="btn btn-secondary" onclick="handleLogout(); toggleMobileMenu()">Logout</button>
+        </div>
     </div>
-    <script src="app.js"></script>
-</body>
+    
+    <main class="dashboard-main">
+        <div class="container">
+            
+            <div class="dashboard-header">
+                <h1>Available Courses</h1>
+            </div>
+            
+            <div id="published-courses" class="course-list">
+                <div class="course-card">
+                    <h3>Loading Course Title...</h3>
+                    <p>Fetching course description from the server. Please wait.</p>
+                    <div class="course-meta">
+                        <span><i class="fas fa-user"></i> Author Name</span>
+                        <span><i class="fas fa-layer-group"></i> Category</span>
+                    </div>
+                </div>
+                <div class="course-card">
+                    <h3>Another Course Example</h3>
+                    <p>This is a static example to show how dynamically loaded courses will look.</p>
+                    <div class="course-meta">
+                        <span><i class="fas fa-user"></i> Jane Doe</span>
+                        <span><i class="fas fa-code"></i> Development</span>
+                    </div>
+                </div>
+            </div>
+            
+            <hr style="border-color: var(--border-color); margin: 4rem 0; border-style: solid; border-width: 1px 0 0 0;">
+            
+            <div id="course-viewer" class="course-viewer-section">
+                <i class="fas fa-hand-pointer fa-2x" style="margin-bottom: 1rem;"></i>
+                <p>Select a course from the list above to view its details here.</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="footer-container container">
+            <div class="footer-left">
+                <h2>About CourseCraft</h2>
+                <p class="footer-intro">CourseCraft is an AI-powered platform that helps you transform your knowledge into engaging courses.</p>
+                <div class="footer-socials">
+                    <a href="#"><i class="fab fa-facebook-f"></i></a>
+                    <a href="#"><i class="fab fa-instagram"></i></a>
+                    <a href="#"><i class="fab fa-twitter"></i></a>
+                    <a href="#"><i class="fab fa-linkedin-in"></i></a>
+                </div>
+            </div>
+            <div class="footer-right">
+                <ul>
+                    <li><a href="#">FAQ</a></li>
+                    <li><a href="#">Terms of Use</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                </ul>
+                <ul>
+                    <li><a href="#">Support</a></li>
+                    <li><a href="#">Community</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2025 CourseCraft. All Rights Reserved.</p>
+        </div>
+    </footer>
+    
+    <script>
+        // Basic theme and mobile menu functionality for the dashboard
+        const doc = document.documentElement;
+        const body = document.body;
+        const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+        const mobileMenu = document.querySelector('.mobile-menu');
+
+        window.toggleTheme = function() {
+            const currentTheme = doc.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            doc.setAttribute('data-theme', newTheme);
+        };
+
+        window.toggleMobileMenu = function() {
+            mobileMenu.classList.toggle('active');
+            mobileMenuBtn.classList.toggle('active');
+            body.style.overflow = mobileMenu.classList.contains('active') ? 'hidden' : 'auto';
+        };
+        
+        window.handleLogout = function() {
+            if(confirm("Are you sure you want to log out?")) {
+                // Clear user tokens from storage
+                localStorage.removeItem('access_token'); 
+                localStorage.removeItem('refresh_token'); 
+                window.location.href = 'index.html'; 
+            }
+        };
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            if (mobileMenuBtn) {
+                mobileMenuBtn.addEventListener('click', toggleMobileMenu);
+            }
+        });
+    </script>
+    <script src="app.js"></script> </body>
 </html>

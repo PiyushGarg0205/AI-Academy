@@ -1,20 +1,116 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <title>AI Academy - Login</title>
-    <link rel="stylesheet" href="styles.css">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Academy | Login</title>
+    <style>
+        body {
+            font-family: "Inter", sans-serif;
+            background-color: #0e0e10;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .modal-content {
+            background: #1c1c20;
+            padding: 2rem;
+            border-radius: 1rem;
+            width: 350px;
+            box-shadow: 0 0 20px rgba(255,255,255,0.05);
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            margin-bottom: .5rem;
+            font-weight: 500;
+            color: #a1a1aa; /* Lighter text for labels */
+        }
+        input {
+            width: 100%;
+            padding: .7rem;
+            border: 1px solid #3f3f46; /* Subtle border */
+            border-radius: .5rem;
+            background: #2a2a2f;
+            color: #fff;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #4f46e5;
+        }
+        .btn {
+            width: 100%;
+            padding: .8rem;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: .5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 1rem; /* Added margin for spacing */
+        }
+        .btn:hover {
+            background: #4338ca;
+        }
+        .switch-modal {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: #a1a1aa;
+        }
+        .switch-modal a {
+            color: #818cf8;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .switch-modal a:hover {
+            text-decoration: underline;
+        }
+        #error-message {
+            display: none; /* Hide by default */
+            background: #991b1b33;
+            color: #f87171;
+            text-align: center;
+            padding: .5rem;
+            border-radius: .5rem;
+            margin-bottom: 1rem;
+            font-size: 0.9rem;
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
-        <h1>Login to AI Academy</h1>
-        <form id="login-form">
-            <input type="text" id="username" placeholder="Username" required>
-            <input type="password" id="password" placeholder="Password" required>
-            <button type="submit">Login</button>
-        </form>
-        <p id="error-message" class="error"></p>
+  <div class="modal-content">
+    <h2>Welcome Back</h2>
+    <p id="error-message"></p> <form id="login-form">
+      <div class="form-group">
+        <label for="username">Username</label>
+        <input type="text" id="username" placeholder="Enter your username" required>
+      </div>
+      <div class="form-group">
+        <label for="password">Password</label>
+        <input type="password" id="password" placeholder="Enter your password" required>
+      </div>
+      <button type="submit" class="btn">Login</button>
+    </form>
+    <div class="switch-modal">
+      Don’t have an account? <a href="signup.html">Sign up</a>
     </div>
-    <script src="app.js"></script>
+  </div>
+
+<script src="app.js"></script>
+
 </body>
 </html>

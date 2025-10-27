@@ -64,12 +64,12 @@
               <span class="theme-icon">☀️</span>
             </div>
             <div class="nav-actions">
-              <a href="login.html" class="btn-link" onclick="openModal('signin-modal')">Sign In</a>
-              <a href="login.html" class="btn btn-primary" onclick="openModal('signup-modal')">Sign Up</a>
+              <a href="login.html" class="btn-link">Sign In</a>
+              <a href="signup.html" class="btn btn-primary">Sign up</a>
             </div>
           </div>
 
-          <button class="mobile-menu-btn" type="button" aria-label="Toggle mobile menu">
+          <button class="mobile-menu-btn" type="button" aria-label="Toggle mobile menu" onclick="toggleMobileMenu()">
             <span></span><span></span><span></span>
           </button>
         </div>
@@ -93,8 +93,8 @@
         </li>
       </ul>
       <div class="mobile-menu-buttons">
-        <button class="btn btn-secondary" onclick="openModal('signin-modal'); toggleMobileMenu()">Sign In</button>
-        <button class="btn btn-primary" onclick="openModal('signup-modal'); toggleMobileMenu()">Sign Up</button>
+        <a href="login.html" class="btn btn-secondary">Sign In</a>
+        <a href="signup.html" class="btn btn-primary">Sign up</a>
       </div>
     </div>
 
@@ -111,7 +111,7 @@
               Transform your knowledge into engaging courses with our intelligent course generator. From concept to completion in record time.
             </p>
             <div class="hero-actions">
-              <button class="btn btn-primary pulse-animation" onclick="openModal('signup-modal')">Start Creating →</button>
+              <button class="btn btn-primary pulse-animation" onclick="window.location.href='signup.html'">Start Creating →</button>
               <a href="#demo" class="btn btn-secondary scroll-link">📺 View Demo</a>
             </div>
             <div class="stats">
@@ -207,59 +207,9 @@
         </div>
       </div>
       <div class="footer-bottom">
-        <p>© 2025 CourseCraft. All Rights Reserved.</p>
+        <p>©️ 2025 CourseCraft. All Rights Reserved.</p>
       </div>
     </footer>
-
-    <div id="signin-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="signin-title">
-      <div class="modal-content">
-        <button class="close-btn" onclick="closeModal('signin-modal')" aria-label="Close sign in modal">&times;</button>
-        <h2 id="signin-title" class="modal-title">Welcome Back</h2>
-        <form id="signin-form">
-          <div class="form-group">
-            <label for="signin-email">Email</label>
-            <input type="email" id="signin-email" placeholder="Enter your email" required/>
-          </div>
-          <div class="form-group">
-            <label for="signin-password">Password</label>
-            <input type="password" id="signin-password" placeholder="Enter your password" required/>
-          </div>
-          <div class="modal-actions">
-            <button type="submit" class="btn btn-primary">Sign In</button>
-          </div>
-        </form>
-        <div class="switch-modal">
-          Don't have an account? <a href="#" onclick="switchModal('signin-modal', 'signup-modal')">Sign up</a>
-        </div>
-      </div>
-    </div>
-
-    <div id="signup-modal" class="modal" role="dialog" aria-modal="true" aria-labelledby="signup-title">
-      <div class="modal-content">
-        <button class="close-btn" onclick="closeModal('signup-modal')" aria-label="Close sign up modal">&times;</button>
-        <h2 id="signup-title" class="modal-title">Start Your Journey</h2>
-        <form id="signup-form">
-          <div class="form-group">
-            <label for="signup-name">Full Name</label>
-            <input type="text" id="signup-name" placeholder="Enter your full name" required/>
-          </div>
-          <div class="form-group">
-            <label for="signup-email">Email</label>
-            <input type="email" id="signup-email" placeholder="Enter your email" required/>
-          </div>
-          <div class="form-group">
-            <label for="signup-password">Password</label>
-            <input type="password" id="signup-password" placeholder="Create a password" required/>
-          </div>
-          <div class="modal-actions">
-            <button type="submit" class="btn btn-primary">Create Account</button>
-          </div>
-        </form>
-        <div class="switch-modal">
-          Already have an account? <a href="#" onclick="switchModal('signup-modal', 'signin-modal')">Sign in</a>
-        </div>
-      </div>
-    </div>
 
     <script src="app.js"></script>
   </body>

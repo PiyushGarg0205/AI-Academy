@@ -234,3 +234,40 @@ function setupStudentDashboard() {
 
     loadPublishedCourses(); // Initial load of courses
 }
+// Keep this code for smooth scrolling on the landing page
+document.querySelectorAll('a[href^="#"]').forEach((anchor) => {
+  anchor.addEventListener("click", function (e) {
+    e.preventDefault();
+    const target = document.querySelector(this.getAttribute("href"));
+    if (target) {
+      window.scrollTo({
+        top: target.offsetTop - 70, // Adjust navbar height if needed
+        behavior: "smooth",
+      });
+    }
+  });
+});
+
+// The modal functions are no longer needed and can be deleted.
+// Add this function to your app.js file
+
+function toggleMobileMenu() {
+    const mobileMenuBtn = document.querySelector('.mobile-menu-btn');
+    const mobileMenu = document.querySelector('.mobile-menu');
+    
+    mobileMenuBtn.classList.toggle('active');
+    mobileMenu.classList.toggle('active');
+}
+// Add this function to your app.js file
+function toggleTheme() {
+    const doc = document.documentElement;
+    const currentTheme = doc.getAttribute('data-theme');
+    const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+    doc.setAttribute('data-theme', newTheme);
+    localStorage.setItem('theme', newTheme); // Save the choice
+}
+// Add this code to run when the page loads
+document.addEventListener('DOMContentLoaded', () => {
+    const savedTheme = localStorage.getItem('theme') || 'dark'; // Default to dark
+    document.documentElement.setAttribute('data-theme', savedTheme);
+});

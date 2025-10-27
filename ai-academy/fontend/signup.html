@@ -1,88 +1,117 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign Up</title>
+    <title>CourseCraft | Sign Up</title>
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: #f4f7f9;
+            font-family: "Inter", sans-serif;
+            background-color: #0e0e10;
+            color: #fff;
             display: flex;
-            justify-content: center;
             align-items: center;
+            justify-content: center;
             height: 100vh;
             margin: 0;
         }
-        .form-container {
-            background: #fff;
+        .modal-content {
+            background: #1c1c20;
             padding: 2rem;
-            border-radius: 8px;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 400px;
+            border-radius: 1rem;
+            width: 350px;
+            box-shadow: 0 0 20px rgba(255,255,255,0.05);
         }
         h2 {
             text-align: center;
-            color: #333;
             margin-bottom: 1.5rem;
+            font-weight: 600;
         }
-        .input-group {
+        .form-group {
             margin-bottom: 1rem;
         }
         label {
             display: block;
-            margin-bottom: 0.5rem;
-            color: #555;
+            margin-bottom: .5rem;
+            font-weight: 500;
+            color: #a1a1aa;
         }
         input {
             width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            box-sizing: border-box; /* Important for padding */
+            padding: .7rem;
+            border: 1px solid #3f3f46;
+            border-radius: .5rem;
+            background: #2a2a2f;
+            color: #fff;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
         }
-        button {
+        input:focus {
+            outline: none;
+            border-color: #4f46e5;
+        }
+        .btn {
             width: 100%;
-            padding: 0.75rem;
-            border: none;
-            border-radius: 4px;
-            background-color: #007bff;
+            padding: .8rem;
+            background: #4f46e5;
             color: white;
-            font-size: 1rem;
+            border: none;
+            border-radius: .5rem;
+            font-weight: 600;
             cursor: pointer;
-            transition: background-color 0.2s;
+            transition: background 0.2s;
+            margin-top: 1rem;
         }
-        button:hover {
-            background-color: #0056b3;
+        .btn:hover {
+            background: #4338ca;
+        }
+        .switch-modal {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: #a1a1aa;
+        }
+        .switch-modal a {
+            color: #818cf8;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .switch-modal a:hover {
+            text-decoration: underline;
         }
         #message {
             text-align: center;
             margin-top: 1rem;
-            color: red;
+            font-size: 0.9rem;
+            padding: .5rem;
+            border-radius: .5rem;
+            display: none; /* Hide by default */
         }
     </style>
 </head>
 <body>
 
-    <div class="form-container">
+    <div class="modal-content">
         <h2>Create Your Account</h2>
-        <form id="signup-form">
-            <div class="input-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" name="username" required>
-            </div>
-            <div class="input-group">
-                <label for="email">Email</label>
-                <input type="email" id="email" name="email">
-            </div>
-            <div class="input-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" required>
-            </div>
-            <button type="submit">Sign Up</button>
-        </form>
         <p id="message"></p>
+        <form id="signup-form">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Choose a username" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Create a strong password" required>
+            </div>
+            <button type="submit" class="btn">Create Account</button>
+        </form>
+        <div class="switch-modal">
+            Already have an account? <a href="login.html">Sign in</a>
+        </div>
     </div>
 
     <script>
@@ -90,45 +119,48 @@
         const messageElement = document.getElementById('message');
 
         form.addEventListener('submit', async (event) => {
-            event.preventDefault(); // Prevent the default form submission
+            event.preventDefault(); // Prevent default form submission
 
             const username = form.elements.username.value;
             const email = form.elements.email.value;
             const password = form.elements.password.value;
+            messageElement.style.display = 'none'; // Hide previous messages
 
             try {
                 const response = await fetch('http://localhost:8000/api/register/', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        username,
-                        email,
-                        password,
-                    }),
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, password }),
                 });
 
                 const data = await response.json();
+                messageElement.style.display = 'block'; // Show the message element
 
                 if (response.ok) {
-                    messageElement.style.color = 'green';
+                    messageElement.style.color = '#22c55e'; // Green for success
+                    messageElement.style.background = '#16a34a33';
                     messageElement.textContent = data.message;
+                    
                     alert('Registration successful! Redirecting to login page...');
                     
-                    // Redirect to the login page after a short delay
                     setTimeout(() => {
-                        window.location.href = 'login.html'; // Create this file next
-                    }, 1000);
+                        window.location.href = 'login.html';
+                    }, 1500);
 
                 } else {
-                    // Display error messages from the backend
-                    // Handles cases like "username already exists"
-                    messageElement.style.color = 'red';
-                    messageElement.textContent = JSON.stringify(data);
+                    messageElement.style.color = '#f87171'; // Red for error
+                    messageElement.style.background = '#991b1b33';
+                    // Nicely format the error message
+                    let errorText = 'Registration failed. ';
+                    if (data.username) errorText += `Username: ${data.username.join(' ')}`;
+                    if (data.email) errorText += `Email: ${data.email.join(' ')}`;
+                    if (data.password) errorText += `Password: ${data.password.join(' ')}`;
+                    messageElement.textContent = errorText;
                 }
             } catch (error) {
-                messageElement.style.color = 'red';
+                messageElement.style.display = 'block';
+                messageElement.style.color = '#f87171';
+                messageElement.style.background = '#991b1b33';
                 messageElement.textContent = 'An error occurred. Please try again.';
                 console.error('Error:', error);
             }
