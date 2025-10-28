@@ -27,18 +27,14 @@
           --success-color: #22c55e;
           --error-color: #ef4444;
         }
-
         [data-theme="light"] {
           --bg-primary: #ffffff;
           --bg-card: #f8f9ff;
           --text-primary: #1a1a1a;
           --text-secondary: #404040;
-          --text-muted: #666666;
           --border-color: rgba(0, 0, 0, 0.1);
           --nav-bg: rgba(255, 255, 255, 0.85);
-          --accent-gradient: linear-gradient(135deg, #4800f0, #c41af3);
         }
-
         *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: "Inter", sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.6; }
         .container { max-width: 1400px; margin: 0 auto; padding: 0 20px; }
@@ -49,31 +45,31 @@
         nav { position: fixed; top: 0; width: 100%; z-index: 1000; background: var(--nav-bg); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color); }
         .nav-container { display: flex; align-items: center; justify-content: space-between; padding: 1rem 2rem; }
         .logo { display: flex; align-items: center; gap: 0.5rem; font-size: 1.5rem; font-weight: 800; text-decoration: none; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .logo-box { background: linear-gradient(135deg, #9d00ff, #6200ff); border-radius: 15px; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; padding: 4px; color: white; }
+        .logo-box { background: linear-gradient(135deg, #9d00ff, #6200ff); border-radius: 15px; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; color: white; }
         .nav-center { display: flex; }
         .nav-links { display: flex; list-style: none; gap: 1.5rem; }
-        .nav-links a { color: var(--text-secondary); text-decoration: none; font-weight: 500; padding: 0.2rem 0; position: relative; }
-        .nav-links a.active-nav, .nav-links a:hover { color: var(--text-primary); }
-        .nav-links a::after { content: ""; position: absolute; width: 0; height: 2px; bottom: -2px; left: 50%; transform: translateX(-50%); background: var(--accent-gradient); transition: width 0.3s ease-out; }
-        .nav-links a:hover::after, .nav-links a.active-nav::after { width: 100%; }
-        .nav-items, .nav-actions { display: flex; align-items: center; gap: 1rem; }
-        .btn { padding: 0.75rem 1.5rem; border-radius: 8px; text-decoration: none; font-weight: 600; transition: all 0.3s ease; border: none; cursor: pointer; }
+        .nav-links a { color: var(--text-secondary); text-decoration: none; font-weight: 500; }
+        .nav-items, .nav-actions { display: flex; align-items: center; gap: 1.5rem; }
+        .btn { padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; border: none; cursor: pointer; text-decoration: none; }
         .btn-secondary { background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-color); }
         .btn:disabled { opacity: 0.5; cursor: not-allowed; }
-        
+        .theme-toggle { display: flex; align-items: center; gap: 0.5rem; }
+        .toggle-switch { position: relative; width: 50px; height: 25px; background: var(--bg-card); border-radius: 25px; border: 1px solid var(--border-color); cursor: pointer; }
+        .toggle-slider { position: absolute; top: 2px; left: 2px; width: 19px; height: 19px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 50%; transition: transform 0.3s ease; }
+        [data-theme="light"] .toggle-slider { transform: translateX(25px); }
+
         /* ===============================================
-           DASHBOARD & COURSE LIST STYLES
+           DASHBOARD & COURSE CARD STYLES
            =============================================== */
         .dashboard-main { padding: 120px 0 5rem; min-height: 100vh; }
         .dashboard-header { margin-bottom: 2.5rem; }
         .dashboard-header h1 { font-size: 2.5rem; font-weight: 700; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        
         .course-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; }
         .course-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 15px; padding: 1.5rem; cursor: pointer; transition: all 0.3s ease; display: flex; flex-direction: column; }
         .course-card:hover { transform: translateY(-5px); border-color: var(--border-hover); background: var(--bg-card-hover); }
-        .course-card h3 { font-size: 1.25rem; margin-bottom: 0.5rem; color: var(--text-primary); }
+        .course-card h3 { font-size: 1.25rem; margin-bottom: 0.5rem; }
         .course-card p { color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1.5rem; flex-grow: 1; }
-        .course-meta { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid var(--border-color); padding-top: 1rem; margin-top: auto; }
+        .course-meta { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid var(--border-color); padding-top: 1rem; margin-top: auto; }
         .course-meta span { display: flex; align-items: center; gap: 0.3rem; }
 
         /* ===============================================
@@ -83,36 +79,77 @@
         .course-sidebar { background: var(--bg-card); border-radius: 15px; padding: 1.5rem; border: 1px solid var(--border-color); height: fit-content; position: sticky; top: 100px; }
         .course-sidebar h3 { font-size: 1.25rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; }
         .module-header { font-weight: 600; padding: 0.75rem; border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .module-header i { transition: transform 0.3s ease; }
         .lesson-list { list-style: none; padding-left: 1rem; max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
         .module.active .lesson-list { max-height: 500px; }
         .module.active .module-header i { transform: rotate(180deg); }
-        .lesson-list-item a { display: block; padding: 0.6rem 0.75rem; color: var(--text-secondary); text-decoration: none; border-radius: 6px; margin: 0.25rem 0; font-size: 0.95rem; }
+        .lesson-list-item a { display: block; padding: 0.6rem 0.75rem; color: var(--text-secondary); text-decoration: none; border-radius: 6px; font-size: 0.95rem; }
         .lesson-list-item.active a { background: var(--accent-gradient); color: white; font-weight: 500; }
-        
         .lesson-content-area { background: var(--bg-card); border-radius: 15px; padding: 2rem 2.5rem; border: 1px solid var(--border-color); }
-        #lesson-title { font-size: 2.25rem; font-weight: 700; margin-bottom: 2rem; }
+        .course-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; }
+        #lesson-title { font-size: 2.25rem; font-weight: 700; margin-bottom: 0; }
+        .course-actions a { display: inline-flex; align-items: center; gap: 0.5rem; }
         .video-container { position: relative; padding-bottom: 56.25%; height: 0; border-radius: 10px; margin-bottom: 2rem; background: #000; }
         .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
         .text-content { margin-top: 2rem; line-height: 1.8; color: var(--text-secondary); }
-        .mcq-container { margin-top: 2.5rem; padding-top: 2rem; border-top: 1px solid var(--border-color); }
-        #mcq-question { font-size: 1.2rem; font-weight: 600; margin-bottom: 1.5rem; }
-        .mcq-option label { display: block; padding: 1rem; border: 1px solid var(--border-color); border-radius: 8px; cursor: pointer; margin-bottom: 0.75rem; transition: all 0.2s; }
-        .mcq-option input { display: none; }
-        .mcq-option label:hover { border-color: var(--border-hover); background: rgba(255, 255, 255, 0.03); }
-        
-        /* --- ✅ THIS IS THE FIX --- */
-        /* This rule highlights the label when the hidden radio button is checked */
-        .mcq-option input:checked + label {
-            border-color: #818cf8; /* A color to indicate selection */
-            background-color: rgba(129, 140, 248, 0.1);
-        }
-
-        #mcq-feedback.correct { color: var(--success-color); }
-        #mcq-feedback.incorrect { color: var(--error-color); }
+        #mcq-container { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 15px; padding: 2rem; margin-top: 2rem; }
+        #mcq-question { font-size: 1.25rem; font-weight: 600; margin-bottom: 1.5rem; }
+        #mcq-options { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem; }
+        .mcq-option { display: flex; align-items: center; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 10px; padding: 1rem 1.2rem; cursor: pointer; transition: all 0.2s ease; }
+        .mcq-option:hover { border-color: var(--border-hover); transform: translateY(-2px); }
+        .mcq-option input[type="radio"] { margin-right: 1rem; -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border: 2px solid var(--border-hover); border-radius: 50%; background-color: var(--bg-primary); cursor: pointer; position: relative; flex-shrink: 0; }
+        .mcq-option input[type="radio"]:checked { background: var(--accent-gradient); border-color: transparent; }
+        .mcq-option input[type="radio"]:checked::before { content: ''; display: block; width: 8px; height: 8px; background-color: var(--text-primary); border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .mcq-option label { flex-grow: 1; cursor: pointer; font-size: 1.05rem; color: var(--text-secondary); }
+        #mcq-feedback { margin-top: 1.5rem; padding: 1rem; border-radius: 10px; font-weight: 600; text-align: center; display: none; }
+        #mcq-feedback.correct { background-color: rgba(34, 197, 94, 0.15); color: var(--success-color); border: 1px solid var(--success-color); }
+        #mcq-feedback.incorrect { background-color: rgba(239, 68, 68, 0.15); color: var(--error-color); border: 1px solid var(--error-color); }
         .lesson-navigation { display: flex; justify-content: space-between; margin-top: 2.5rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem; }
+        
+        /* ===============================================
+           FOOTER
+           =============================================== */
+        .footer { background: var(--bg-card); color: var(--text-secondary); padding: 4rem 2rem; margin-top: 4rem; }
+        .footer-container { display: grid; grid-template-columns: 2fr 1fr; gap: 3rem; }
+        .footer-left h2 { font-size: 2rem; margin-bottom: 1rem; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .footer-right ul { list-style: none; }
+        .footer-right li { margin-bottom: 0.8rem; }
+        .footer-right a { text-decoration: none; color: var(--text-secondary); }
+        .footer-bottom { text-align: center; margin-top: 2rem; border-top: 1px solid var(--border-color); padding-top: 1rem; font-size: 0.9rem; }
+        /* Add these rules to your <style> block */
+
+.nav-links a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.2rem 0; /* Adds space for the underline */
+    position: relative; /* Required for the pseudo-element */
+}
+
+.nav-links a.active-nav, .nav-links a:hover {
+    color: var(--text-primary);
+}
+
+/* This creates the hidden underline */
+.nav-links a::after {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent-gradient);
+    transition: width 0.3s ease-out;
+}
+
+/* This makes the underline appear on hover or when the link is active */
+.nav-links a:hover::after, .nav-links a.active-nav::after {
+    width: 100%;
+}
     </style>
 </head>
-<body data-theme="dark">
+<body>
     
     <header>
       <nav>
@@ -130,6 +167,11 @@
             </ul>
           </div>
           <div class="nav-items">
+            <div class="theme-toggle">
+              <span class="theme-icon">🌙</span>
+              <button class="toggle-switch" type="button" ><span class="toggle-slider"></span></button>
+              <span class="theme-icon">☀️</span>
+            </div>
             <div class="nav-actions">
                 <button class="btn btn-secondary" onclick="handleLogout()">Logout</button>
             </div>
@@ -151,7 +193,12 @@
             </aside>
             <section class="lesson-content-area">
                 <div id="lesson-viewer-content">
-                    <h2 id="lesson-title"></h2>
+                    <div class="course-header">
+                        <h2 id="lesson-title"></h2>
+                        <div class="course-actions">
+                            <a id="reviews-link" href="#" class="btn btn-secondary"><i class="fas fa-star"></i> See Reviews</a>
+                        </div>
+                    </div>
                     <div id="video-container"></div>
                     <div id="text-content"></div>
                     <div id="mcq-container">
@@ -172,16 +219,35 @@
     </main>
     
     <footer class="footer">
-        </footer>
+        <div class="footer-container container">
+            <div class="footer-left">
+                <h2>About CourseCraft</h2>
+                <p>An AI-powered platform to transform knowledge into engaging courses.</p>
+            </div>
+            <div class="footer-right">
+                <ul>
+                    <li><a href="#">FAQ</a></li>
+                    <li><a href="#">Terms of Use</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2025 CourseCraft. All Rights Reserved.</p>
+        </div>
+    </footer>
 
-    <script src="app.js"></script>
-    <script>
-        function handleLogout() {
-            if(confirm("Are you sure you want to log out?")) {
-                localStorage.clear();
-                window.location.href = 'index.html'; 
-            }
-        };
-    </script>
+    <script src="app.js" defer></script>
+<script>
+
+  // ===== LOGOUT FUNCTION (unchanged) =====
+  function handleLogout() {
+    if (confirm("Are you sure you want to log out?")) {
+      localStorage.clear();
+      window.location.href = 'index.html';
+    }
+  }
+</script>
+
 </body>
 </html>
