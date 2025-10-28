@@ -1,0 +1,32 @@
+{
+  "reviews": [
+    {
+      "id": "1",
+      "courseId": 1,
+      "name": "Alex Johnson",
+      "rating": 5,
+      "comment": "This was an amazing introduction to Python! The videos were clear and the MCQs really helped solidify my understanding. Highly recommend!"
+    },
+    {
+      "id": "2",
+      "courseId": 1,
+      "name": "Maria Garcia",
+      "rating": 4,
+      "comment": "A very solid course. I wish there was more text content for one of the lessons, but overall it was a great learning experience."
+    },
+    {
+      "id": "2f25",
+      "courseId": 6,
+      "name": "Piyush Garg",
+      "rating": 3,
+      "comment": "nice"
+    },
+    {
+      "id": "f996",
+      "courseId": 6,
+      "name": "Piyush",
+      "rating": 5,
+      "comment": "very nice\n"
+    }
+  ]
+}

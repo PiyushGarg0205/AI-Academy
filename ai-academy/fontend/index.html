@@ -18,6 +18,8 @@
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
     />
     <link rel="stylesheet" href="styles.css" />
+
+    <script src="app.js" defer></script>
   </head>
 
   <body data-theme="dark">
@@ -58,7 +60,7 @@
           <div class="nav-items">
             <div class="theme-toggle theme-toggle-desktop">
               <span class="theme-icon">🌙</span>
-              <button class="toggle-switch" type="button" onclick="toggleTheme()" aria-pressed="false">
+              <button class="toggle-switch" type="button" aria-pressed="false">
                 <span class="toggle-slider"></span>
               </button>
               <span class="theme-icon">☀️</span>
@@ -69,7 +71,7 @@
             </div>
           </div>
 
-          <button class="mobile-menu-btn" type="button" aria-label="Toggle mobile menu" onclick="toggleMobileMenu()">
+          <button class="mobile-menu-btn" type="button" aria-label="Toggle mobile menu">
             <span></span><span></span><span></span>
           </button>
         </div>
@@ -78,14 +80,14 @@
 
     <div class="mobile-menu">
       <ul class="mobile-menu-links">
-        <li><a href="#features-section" class="scroll-link" onclick="toggleMobileMenu()">Features</a></li>
-        <li><a href="#demo" class="scroll-link" onclick="toggleMobileMenu()">Generate</a></li>
-        <li><a href="#about" class="scroll-link" onclick="toggleMobileMenu()">About</a></li>
+        <li><a href="#features-section" class="scroll-link">Features</a></li>
+        <li><a href="#demo" class="scroll-link">Generate</a></li>
+        <li><a href="#about" class="scroll-link">About</a></li>
         <li class="theme-toggle-mobile">
           <div class="theme-toggle">
             <h2>Theme</h2>
             <span class="theme-icon">🌙</span>
-            <button class="toggle-switch" type="button" onclick="toggleTheme()" aria-pressed="false">
+            <button class="toggle-switch" type="button" aria-pressed="false">
               <span class="toggle-slider"></span>
             </button>
             <span class="theme-icon">☀️</span>
@@ -210,7 +212,5 @@
         <p>©️ 2025 CourseCraft. All Rights Reserved.</p>
       </div>
     </footer>
-
-    <script src="app.js"></script>
   </body>
 </html>

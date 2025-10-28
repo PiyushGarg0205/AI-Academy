@@ -4,7 +4,21 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CourseCraft | Login</title>
-    <link rel="stylesheet" href="styles.css"> </head>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        /* Hides the error message by default */
+        #error-message {
+            display: none;
+            background: rgba(239, 68, 68, 0.1);
+            color: #ef4444;
+            padding: 0.75rem;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
 <body>
   <div class="modal-content">
     <h2>Welcome Back</h2>
@@ -18,13 +32,14 @@
         <label for="password">Password</label>
         <input type="password" id="password" placeholder="Enter your password" required>
       </div>
-      <button type="submit" class="btn">Login</button>
+      <button type="submit" class="btn btn-primary">Login</button>
     </form>
     <div class="switch-modal">
       Don’t have an account? <a href="signup.html">Sign up</a>
     </div>
   </div>
 
-<script src="app.js"></script>
+<script src="app.js" defer></script>
+
 </body>
 </html>
