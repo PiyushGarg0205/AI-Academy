@@ -89,19 +89,99 @@ async function setupAdminDashboard() {
         return;
     }
 
-    // Example admin dashboard setup
-    const userInfoEl = document.getElementById('admin-info');
-    if (userInfoEl) {
+    const courseListDiv = document.getElementById('course-list');
+    const generateForm = document.getElementById('generate-form');
+    const generateStatus = document.getElementById('generate-status');
+
+    // This function fetches and displays all existing courses
+    async function loadCourses() {
         try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            userInfoEl.textContent = `Welcome, ${payload.username || 'Admin'}`;
-        } catch {
-            userInfoEl.textContent = 'Welcome, Admin';
+            const response = await fetch(`${API_BASE_URL}/courses/`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            const courses = await response.json();
+            
+            courseListDiv.innerHTML = ''; // Clear previous list
+            courses.forEach(course => {
+                const courseEl = document.createElement('div');
+                courseEl.className = 'course-list-item';
+                courseEl.innerHTML = `
+                    <div class="course-info">
+                        <p class="course-title">${course.title}</p>
+                        <p class="course-details">Status: <strong class="${course.status.toLowerCase()}">${course.status}</strong></p>
+                    </div>
+                    <div class="course-actions">
+                        <button class="btn btn-secondary" onclick="publishCourse(${course.id})" ${course.status === 'PUBLISHED' ? 'disabled' : ''}>Publish</button>
+                        <button class="btn btn-secondary" onclick="deleteCourse(${course.id})">Delete</button>
+                    </div>
+                `;
+                courseListDiv.appendChild(courseEl);
+            });
+        } catch (error) {
+            courseListDiv.innerHTML = `<p style="color:red;">Failed to load courses.</p>`;
         }
     }
 
-    // Additional admin dashboard logic (course creation, review, etc.) goes here
-    console.log('Admin Dashboard Loaded ✅');
+    // Function to publish a course
+    window.publishCourse = async function(courseId) {
+        if (!confirm('Are you sure you want to publish this course?')) return;
+        
+        await fetch(`${API_BASE_URL}/courses/${courseId}/`, {
+            method: 'PATCH',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ status: 'PUBLISHED' })
+        });
+        loadCourses(); // Refresh the list
+    }
+
+    // Function to delete a course
+    window.deleteCourse = async function(courseId) {
+        if (!confirm('Are you sure you want to permanently delete this course?')) return;
+
+        await fetch(`${API_BASE_URL}/courses/${courseId}/`, {
+            method: 'DELETE',
+            headers: { 'Authorization': `Bearer ${token}` }
+        });
+        loadCourses(); // Refresh the list
+    }
+
+    // ✅ THIS IS THE CRITICAL PART THAT WAS MISSING
+    // Add event listener to the course generation form
+    generateForm.addEventListener('submit', async (event) => {
+        event.preventDefault(); // Stop the form from reloading the page
+        generateStatus.textContent = '🤖 Generating course... This may take a minute.';
+        
+        const prompt = document.getElementById('prompt').value;
+        const num_modules = document.getElementById('num_modules').value;
+
+        try {
+            const response = await fetch(`${API_BASE_URL}/courses/generate/`, {
+                method: 'POST',
+                headers: { 
+                    'Content-Type': 'application/json', 
+                    'Authorization': `Bearer ${token}` 
+                },
+                body: JSON.stringify({ prompt, num_modules })
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Failed to generate course.');
+            }
+
+            generateStatus.textContent = '✅ Course generated successfully!';
+            generateForm.reset();
+            loadCourses(); // Refresh the course list to show the new one
+        } catch (error) {
+            generateStatus.textContent = `❌ Error: ${error.message}`;
+        }
+    });
+
+    // Initial load of courses when the page is ready
+    loadCourses();
 }
 
 
