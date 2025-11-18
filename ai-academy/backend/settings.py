@@ -134,7 +134,8 @@ REST_FRAMEWORK = {
     ),
 }
 CORS_ALLOWED_ORIGINS = [
-    "http://127.0.0.1:3000", # The origin of your VS Code Live Server
+    "http://localhost:5173",  # Your React app's URL
+    "http://127.0.0.1:5173", # The origin of your VS Code Live Server
     "null" # Allows opening the file directly (for simple testing)
 ]
 # backend/settings.py
@@ -144,3 +145,7 @@ SIMPLE_JWT = {
     # Use the custom serializer we created
     'TOKEN_OBTAIN_SERIALIZER': 'core.serializers.MyTokenObtainPairSerializer',
 }
+CORS_ALLOW_HEADERS = [
+    'content-type',
+    'authorization',
+]

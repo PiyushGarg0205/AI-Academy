@@ -1,14 +1,23 @@
-# core/urls.py
 from django.urls import path
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
 )
 from .views import (
-    CourseListAPIView,
     RegisterView,
     CourseGenerateAPIView,
-    CourseDetailAPIView
+    CourseListAPIView,
+    CourseDetailAPIView,
+    generate_single_module,
+    ModuleCreateAPIView,
+    ModuleDetailAPIView,
+    LessonCreateAPIView,
+    LessonDetailAPIView,
+    # --- We need to add these ---
+    QuizCreateAPIView,
+    QuizDetailAPIView,
+    QuestionCreateAPIView,
+    QuestionDetailAPIView
 )
 
 urlpatterns = [
@@ -19,9 +28,25 @@ urlpatterns = [
     
     # --- Course URLs ---
     path('courses/generate/', CourseGenerateAPIView.as_view(), name='course-generate'),
-    # The old 'courses/create/' path has been removed.
-    # core/urls.py
     path('courses/', CourseListAPIView.as_view(), name='course-list'),
-
     path('courses/<int:pk>/', CourseDetailAPIView.as_view(), name='course-detail'),
+    
+    # --- AI URL ---
+    path('courses/<int:course_pk>/generate-module/', generate_single_module, name='generate-single-module'),
+    
+    # --- MODULE CRUD URLS ---
+    path('modules/', ModuleCreateAPIView.as_view(), name='module-create'),
+    path('modules/<int:pk>/', ModuleDetailAPIView.as_view(), name='module-detail'),
+
+    # --- LESSON CRUD URLS ---
+    path('lessons/', LessonCreateAPIView.as_view(), name='lesson-create'),
+    path('lessons/<int:pk>/', LessonDetailAPIView.as_view(), name='lesson-detail'),
+
+    # --- QUIZ CRUD URLS ---
+    path('quizzes/', QuizCreateAPIView.as_view(), name='quiz-create'),
+    path('quizzes/<int:pk>/', QuizDetailAPIView.as_view(), name='quiz-detail'),
+
+    # --- QUESTION CRUD URLS ---
+    path('questions/', QuestionCreateAPIView.as_view(), name='question-create'),
+    path('questions/<int:pk>/', QuestionDetailAPIView.as_view(), name='question-detail'),
 ]
