@@ -1,0 +1,154 @@
+/* src/pages/AdminCourseEditPage.css */
+
+.admin-modules-list h2 {
+  color: var(--text-primary);
+  margin-bottom: 1rem;
+}
+
+.edit-divider {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 2rem 0;
+}
+.edit-divider-inner {
+  border: none;
+  border-top: 1px solid var(--border-color);
+  margin: 1rem 0;
+}
+
+.edit-module {
+  margin-bottom: 1.5rem;
+  padding: 0; /* Remove padding to let header span full width */
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+}
+
+.edit-module-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem 2rem;
+  cursor: pointer;
+}
+.edit-module-header:hover {
+  background: var(--bg-card-hover);
+}
+
+.module-title-input {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  flex-grow: 1;
+  margin-left: 0.5rem;
+}
+.module-title-input:focus {
+  outline: none;
+  border-bottom: 2px solid var(--border-hover);
+  background: var(--bg-primary);
+}
+
+.module-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  color: var(--text-secondary);
+  padding-left: 1rem;
+}
+.module-header-actions .fa-chevron-down {
+  transition: transform 0.3s ease;
+}
+.module-header-actions .fa-chevron-down.expanded {
+  transform: rotate(180deg);
+}
+
+.btn-icon {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: var(--text-secondary);
+  font-size: 1rem;
+}
+.btn-icon.delete:hover {
+  color: #ef4444; /* Red */
+}
+
+.edit-module-content {
+  padding: 0 2rem 2rem 2rem;
+  border-top: 1px solid var(--border-color);
+}
+.edit-module-content h3 {
+  color: var(--text-primary);
+  margin-top: 1.5rem;
+  margin-bottom: 1rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-color);
+}
+
+/* Lesson/Question Form */
+.edit-lesson-item {
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  margin-bottom: 1rem;
+  background: var(--bg-primary); /* Slightly different bg */
+}
+
+.edit-lesson-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  cursor: pointer;
+}
+.edit-lesson-header span {
+  font-weight: 600;
+  color: var(--text-secondary);
+  /* Truncate long text */
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  padding-right: 1rem;
+}
+.lesson-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-shrink: 0; /* Prevent actions from wrapping */
+}
+.lesson-header-actions .fa-chevron-down {
+  transition: transform 0.3s ease;
+}
+.lesson-header-actions .fa-chevron-down.expanded {
+  transform: rotate(180deg);
+}
+
+.edit-lesson-form {
+  padding: 0 1.5rem 1.5rem 1.5rem;
+}
+.edit-lesson-form .form-group {
+  margin-bottom: 1rem;
+}
+.edit-lesson-form label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--text-secondary);
+}
+.edit-lesson-form input,
+.edit-lesson-form textarea {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--border-color);
+  background: var(--bg-card);
+  color: var(--text-primary);
+  border-radius: 8px;
+  font-size: 0.95rem;
+  margin-top: 0.25rem;
+}
+.edit-lesson-form input:focus,
+.edit-lesson-form textarea:focus {
+  outline: none;
+  border-color: var(--border-hover);
+}

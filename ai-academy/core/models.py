@@ -2,10 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 
 # core/models.py
-from django.db import models
-from django.contrib.auth.models import User
 
-# Your Profile model should be here
 class Profile(models.Model):
     """Extends the built-in User model to add roles."""
     class Role(models.TextChoices):
@@ -32,48 +29,76 @@ class Course(models.Model):
         return self.title
 
 class Module(models.Model):
+    # --- NEW ---
+    class ModuleType(models.TextChoices):
+        CONTENT = 'CONTENT', 'Content'
+        ASSESSMENT = 'ASSESSMENT', 'Assessment'
+    # -----------
+
     course = models.ForeignKey(Course, related_name='modules', on_delete=models.CASCADE)
     title = models.CharField(max_length=200)
     order = models.PositiveIntegerField()
+    
+    # --- NEW ---
+    module_type = models.CharField(
+        max_length=20, 
+        choices=ModuleType.choices, 
+        default=ModuleType.CONTENT
+    )
+    # -----------
 
     class Meta:
         ordering = ['order']
 
     def __str__(self):
-        return self.title
+        # Updated string representation to be more informative
+        return f"[{self.course.title}] - {self.title} ({self.get_module_type_display()})"
 
-class Video(models.Model):
-    module = models.ForeignKey(Module, related_name='videos', on_delete=models.CASCADE)
-    title = models.CharField(max_length=255)
-    url = models.URLField()
-    order = models.PositiveIntegerField()
-
-    def __str__(self):
-        return self.title
-
-class MCQ(models.Model):
-    video = models.ForeignKey(Video, related_name='mcqs', on_delete=models.CASCADE)
-    question = models.TextField()
-    options = models.JSONField()
-    correct_answer = models.CharField(max_length=255)
-
-    def __str__(self):
-        return self.question[:50]
-    
 class Lesson(models.Model):
     module = models.ForeignKey(Module, on_delete=models.CASCADE, related_name='lessons')
     title = models.CharField(max_length=255)
     content = models.TextField() # The main text content
     order = models.PositiveIntegerField(default=0)
-
-    # --- NEW FIELDS ---
     video_id = models.CharField(max_length=100, blank=True, null=True) # Optional YouTube video ID
-    mcq_question = models.TextField(blank=True, null=True)
-    mcq_options = models.JSONField(blank=True, null=True) # Will store a list like ["A", "B", "C"]
-    mcq_correct_answer = models.CharField(max_length=255, blank=True, null=True)
+
+    # --- REMOVED ---
+    # The single mcq_question, mcq_options, and mcq_correct_answer fields
+    # have been removed. This logic is now handled by the new Quiz/Question models.
+    # ---------------
 
     class Meta:
         ordering = ['order']
 
     def __str__(self):
         return self.title
+
+# --- NEW MODEL ---
+class Quiz(models.Model):
+    """
+    A quiz, which is linked to a single 'ASSESSMENT' type Module.
+    """
+    # A module can only have one quiz, and a quiz belongs to only one module
+    module = models.OneToOneField(Module, on_delete=models.CASCADE, related_name='quiz')
+    title = models.CharField(max_length=255, help_text="e.g., Module 1 Test")
+
+    def __str__(self):
+        return self.title
+
+# --- NEW MODEL ---
+class Question(models.Model):
+    """
+    A single multiple-choice question within a Quiz.
+    """
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE, related_name='questions')
+    question_text = models.TextField()
+    # Stores a list of strings, e.g., ["Answer 1", "Answer 2", "Answer 3"]
+    options = models.JSONField() 
+    # Stores the correct answer string, e.g., "Answer 2"
+    correct_answer = models.CharField(max_length=255)
+    order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['order']
+
+    def __str__(self):
+        return self.question_text[:50]

@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import Course, Module, Lesson, Profile
+from .models import Course, Module, Lesson, Profile, Quiz, Question
 
 # =====================================================================
 #  AUTHENTICATION & USER SERIALIZERS
@@ -14,9 +14,7 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
-        # Add custom claims
         token['username'] = user.username
-        # Add role from the user's profile
         token['role'] = user.profile.role 
         return token
 
@@ -35,18 +33,16 @@ class UserSerializer(serializers.ModelSerializer):
             email=validated_data.get('email', ''),
             password=validated_data['password']
         )
-        # Automatically create a student profile for the new user
         Profile.objects.create(user=user, role=Profile.Role.STUDENT)
         return user
 
 # =====================================================================
-#  NESTED SERIALIZERS FOR COURSE STRUCTURE
+#  READ-ONLY NESTED SERIALIZERS (For Student Dashboard)
 # =====================================================================
 
 class LessonSerializer(serializers.ModelSerializer):
     """
-    Serializes a single Lesson, including its content, video, and MCQ data.
-    This is the deepest level of nesting.
+    Serializes a single Lesson. (Now simpler)
     """
     class Meta:
         model = Lesson
@@ -55,31 +51,48 @@ class LessonSerializer(serializers.ModelSerializer):
             'title', 
             'content', 
             'video_id', 
-            'mcq_question', 
-            'mcq_options', 
-            'mcq_correct_answer',
             'order'
         ]
 
+# --- NEW ---
+class QuestionSerializer(serializers.ModelSerializer):
+    """
+    Serializes a single Quiz Question.
+    """
+    class Meta:
+        model = Question
+        fields = ['id', 'question_text', 'options', 'correct_answer', 'order']
+
+# --- NEW ---
+class QuizSerializer(serializers.ModelSerializer):
+    """
+    Serializes a Quiz, nesting all of its Questions.
+    """
+    questions = QuestionSerializer(many=True, read_only=True) 
+
+    class Meta:
+        model = Quiz
+        fields = ['id', 'title', 'questions']
+
 class ModuleSerializer(serializers.ModelSerializer):
     """
-    Serializes a Module, nesting all of its related Lessons inside.
+    Serializes a Module, nesting EITHER its Lessons OR its Quiz
+    based on the module_type.
     """
-    # This is the key part: it nests a list of Lessons.
     lessons = LessonSerializer(many=True, read_only=True) 
+    quiz = QuizSerializer(read_only=True) # This will be null if it's a CONTENT module
 
     class Meta:
         model = Module
-        fields = ['id', 'title', 'order', 'lessons']
+        # Added 'module_type' and 'quiz'
+        fields = ['id', 'title', 'order', 'module_type', 'lessons', 'quiz']
 
 class CourseDetailSerializer(serializers.ModelSerializer):
     """
-    The main serializer that represents the entire course,
-    nesting all of its Modules (which in turn nest their Lessons).
+    The main serializer for the entire course structure.
+    This will automatically pick up the changes from ModuleSerializer.
     """
-    # This nests a list of Modules.
     modules = ModuleSerializer(many=True, read_only=True) 
-    # Provides the username of the course creator.
     creator_username = serializers.CharField(source='created_by.username', read_only=True)
 
     class Meta:
@@ -91,3 +104,43 @@ class CourseDetailSerializer(serializers.ModelSerializer):
             'creator_username', 
             'modules'
         ]
+
+# =====================================================================
+#  WRITEABLE SERIALIZERS (For Admin Editor)
+# =====================================================================
+
+class ModuleWriteSerializer(serializers.ModelSerializer):
+    """
+    Simple serializer for CREATING/UPDATING a Module.
+    """
+    class Meta:
+        model = Module
+        # Added 'module_type'
+        fields = ['id', 'course', 'title', 'order', 'module_type']
+
+class LessonWriteSerializer(serializers.ModelSerializer):
+    """
+    Simple serializer for CREATING/UPDATING a Lesson.
+    """
+    class Meta:
+        model = Lesson
+        # MCQ fields are now removed
+        fields = ['id', 'module', 'title', 'content', 'video_id', 'order']
+
+# --- NEW ---
+class QuizWriteSerializer(serializers.ModelSerializer):
+    """
+    Simple serializer for CREATING/UPDATING a Quiz.
+    """
+    class Meta:
+        model = Quiz
+        fields = ['id', 'module', 'title']
+
+# --- NEW ---
+class QuestionWriteSerializer(serializers.ModelSerializer):
+    """
+    Simple serializer for CREATING/UPDATING a Question.
+    """
+    class Meta:
+        model = Question
+        fields = ['id', 'quiz', 'question_text', 'options', 'correct_answer', 'order']
