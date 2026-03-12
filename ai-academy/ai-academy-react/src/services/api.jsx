@@ -183,3 +183,18 @@ export const updateQuestion = (questionId, questionData) => {
 export const deleteQuestion = (questionId) => {
   return apiFetch(`/questions/${questionId}/`, { method: 'DELETE' });
 };
+
+
+// =====================================================================
+//  REVIEWS
+// =====================================================================
+export const getReviews = (courseId) => {
+  return apiFetch(`/reviews/?course_id=${courseId}`);
+};
+
+export const createReview = (courseId, rating, comment) => {
+  return apiFetch('/reviews/', {
+    method: 'POST',
+    body: JSON.stringify({ course: courseId, rating, comment }),
+  });
+};

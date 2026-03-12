@@ -13,11 +13,14 @@ from .views import (
     ModuleDetailAPIView,
     LessonCreateAPIView,
     LessonDetailAPIView,
-    # --- We need to add these ---
     QuizCreateAPIView,
     QuizDetailAPIView,
     QuestionCreateAPIView,
-    QuestionDetailAPIView
+    QuestionDetailAPIView,
+    ReviewListCreateView,
+    # --- NEW IMPORTS ---
+    ExplainOrFailAPIView,
+    QuizSubmissionAPIView
 )
 
 urlpatterns = [
@@ -31,22 +34,31 @@ urlpatterns = [
     path('courses/', CourseListAPIView.as_view(), name='course-list'),
     path('courses/<int:pk>/', CourseDetailAPIView.as_view(), name='course-detail'),
     
-    # --- AI URL ---
+    # --- AI Generator URL ---
     path('courses/<int:course_pk>/generate-module/', generate_single_module, name='generate-single-module'),
     
     # --- MODULE CRUD URLS ---
     path('modules/', ModuleCreateAPIView.as_view(), name='module-create'),
     path('modules/<int:pk>/', ModuleDetailAPIView.as_view(), name='module-detail'),
+    
+    # --- NEW: QUIZ SUBMISSION (Unlocks next module) ---
+    path('modules/<int:module_id>/submit-quiz/', QuizSubmissionAPIView.as_view(), name='submit-quiz'),
 
     # --- LESSON CRUD URLS ---
     path('lessons/', LessonCreateAPIView.as_view(), name='lesson-create'),
     path('lessons/<int:pk>/', LessonDetailAPIView.as_view(), name='lesson-detail'),
 
-    # --- QUIZ CRUD URLS ---
+    # --- NEW: EXPLAIN OR FAIL (Feynman Technique Audio Upload) ---
+    path('lessons/<int:lesson_id>/explain/', ExplainOrFailAPIView.as_view(), name='explain-lesson'),
+
+    # --- QUIZ CRUD URLS (Admin/Editor) ---
     path('quizzes/', QuizCreateAPIView.as_view(), name='quiz-create'),
     path('quizzes/<int:pk>/', QuizDetailAPIView.as_view(), name='quiz-detail'),
 
-    # --- QUESTION CRUD URLS ---
+    # --- QUESTION CRUD URLS (Admin/Editor) ---
     path('questions/', QuestionCreateAPIView.as_view(), name='question-create'),
     path('questions/<int:pk>/', QuestionDetailAPIView.as_view(), name='question-detail'),
+    
+    # --- REVIEWS URL ---
+    path('reviews/', ReviewListCreateView.as_view(), name='review-list-create'),
 ]

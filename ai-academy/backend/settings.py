@@ -182,3 +182,8 @@ CORS_ALLOW_HEADERS = [
     'content-type',
     'authorization',
 ]
+
+MEDIA_URL = '/media/'
+
+# Path where media is stored
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')

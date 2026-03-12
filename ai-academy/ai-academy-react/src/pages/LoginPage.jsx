@@ -32,7 +32,15 @@ function LoginPage() {
 
     try {
       const data = await loginUser(username, password);
-      login(data.access); // Use auth context to set token
+      
+      // 1. UPDATE CONTEXT
+      login(data.access); 
+      
+      // 2. EXPLICITLY SAVE TO LOCAL STORAGE (Fixes 401 in other components)
+      localStorage.setItem('access_token', data.access);
+      if (data.refresh) {
+        localStorage.setItem('refresh_token', data.refresh);
+      }
       
       const payload = jwtDecode(data.access);
       const redirectPath = from || (payload.role === 'ADMIN' ? '/admin-dashboard' : '/student-dashboard');
@@ -47,15 +55,13 @@ function LoginPage() {
   };
 
   return (
-    // Use the AuthModal as the wrapper
     <AuthModal
       title="Welcome Back"
       footerText="Don’t have an account?"
       footerLink="/signup"
       footerLinkText="Sign up"
     >
-      {/* This is passed in as 'children' */}
-      {error && <p id="error-message" style={{ display: 'block' }}>{error}</p>}
+      {error && <p id="error-message" style={{ display: 'block', color: 'red' }}>{error}</p>}
       
       <form id="login-form" onSubmit={handleSubmit}>
         <div className="form-group">
@@ -84,7 +90,6 @@ function LoginPage() {
           {loading ? 'Logging in...' : 'Login'}
         </button>
       </form>
-      {/* The footer link is now part of the modal */}
     </AuthModal>
   );
 }

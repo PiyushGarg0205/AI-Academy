@@ -1,17 +1,19 @@
 // src/App.jsx
 import React from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import { AuthProvider } from './services/AuthContext.jsx'; // Use .jsx
+// Ensure this file exists at src/services/AuthContext.jsx
+import { AuthProvider } from './services/AuthContext.jsx'; 
 
 // Layouts & Pages
-import MainLayout from './components/layout/MainLayout.jsx'; // Use .jsx
-import ProtectedRoute from './components/auth/ProtectedRoute.jsx'; // Use .jsx
-import HomePage from './pages/HomePage.jsx'; // Use .jsx
-import LoginPage from './pages/LoginPage.jsx'; // Use .jsx
-import SignupPage from './pages/SignupPage.jsx'; // Use .jsx
-import AdminDashboard from './pages/AdminDashboard.jsx'; // Use .jsx
-import StudentDashboard from './pages/StudentDashboard.jsx'; // Use .jsx
-import AdminCourseEditPage from './pages/AdminCourseEditPage.jsx'; // Use .jsx
+import MainLayout from './components/layout/MainLayout.jsx'; 
+import ProtectedRoute from './components/auth/ProtectedRoute.jsx'; 
+import HomePage from './pages/HomePage.jsx'; 
+import LoginPage from './pages/LoginPage.jsx'; 
+import SignupPage from './pages/SignupPage.jsx'; 
+import AdminDashboard from './pages/AdminDashboard.jsx'; 
+import StudentDashboard from './pages/StudentDashboard.jsx'; 
+import AdminCourseEditPage from './pages/AdminCourseEditPage.jsx'; 
+import ReviewsPage from './pages/ReviewsPage.jsx'; 
 
 // Global Styles
 import './styles.css';
@@ -60,6 +62,11 @@ function App() {
                 </ProtectedRoute>
               } 
             />
+            {/* 👇 REVIEWS ROUTE 👇 */}
+            <Route 
+              path="/reviews" 
+              element={<ReviewsPage />} 
+            />
           </Route>
         </Routes>
       </BrowserRouter>
@@ -67,4 +74,4 @@ function App() {
   );
 }
 
-export default App; // <-- This is the line that was missing
+export default App;

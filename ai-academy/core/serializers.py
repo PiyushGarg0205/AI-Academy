@@ -1,16 +1,19 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
+from django.db.models import Avg
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import Course, Module, Lesson, Profile, Quiz, Question
+
+# Ensure these are imported from your models.py
+from .models import (
+    Course, Module, Lesson, Profile, Quiz, Question, Review, 
+    ExplanationAttempt, UserProgress
+)
 
 # =====================================================================
 #  AUTHENTICATION & USER SERIALIZERS
 # =====================================================================
 
 class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
-    """
-    Customizes the JWT token to include the user's role.
-    """
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
@@ -19,9 +22,6 @@ class MyTokenObtainPairSerializer(TokenObtainPairSerializer):
         return token
 
 class UserSerializer(serializers.ModelSerializer):
-    """
-    Handles user registration, creating both a User and a Profile.
-    """
     class Meta:
         model = User
         fields = ["id", "username", "email", "password"]
@@ -37,37 +37,45 @@ class UserSerializer(serializers.ModelSerializer):
         return user
 
 # =====================================================================
+#  REVIEW SERIALIZER
+# =====================================================================
+
+class ReviewSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+
+    class Meta:
+        model = Review
+        fields = ['id', 'course', 'user', 'username', 'rating', 'comment', 'created_at']
+        read_only_fields = ['user', 'created_at']
+
+# =====================================================================
+#  EXPLANATION / FEYNMAN SERIALIZER (NEW)
+# =====================================================================
+
+class ExplanationAttemptSerializer(serializers.ModelSerializer):
+    """
+    Used to return the results of the AI evaluation to the frontend.
+    """
+    class Meta:
+        model = ExplanationAttempt
+        fields = ['id', 'lesson', 'transcript', 'feedback', 'is_passed', 'created_at']
+        read_only_fields = ['transcript', 'feedback', 'is_passed', 'created_at']
+
+# =====================================================================
 #  READ-ONLY NESTED SERIALIZERS (For Student Dashboard)
 # =====================================================================
 
 class LessonSerializer(serializers.ModelSerializer):
-    """
-    Serializes a single Lesson. (Now simpler)
-    """
     class Meta:
         model = Lesson
-        fields = [
-            'id', 
-            'title', 
-            'content', 
-            'video_id', 
-            'order'
-        ]
+        fields = ['id', 'title', 'content', 'video_id', 'order']
 
-# --- NEW ---
 class QuestionSerializer(serializers.ModelSerializer):
-    """
-    Serializes a single Quiz Question.
-    """
     class Meta:
         model = Question
         fields = ['id', 'question_text', 'options', 'correct_answer', 'order']
 
-# --- NEW ---
 class QuizSerializer(serializers.ModelSerializer):
-    """
-    Serializes a Quiz, nesting all of its Questions.
-    """
     questions = QuestionSerializer(many=True, read_only=True) 
 
     class Meta:
@@ -75,25 +83,68 @@ class QuizSerializer(serializers.ModelSerializer):
         fields = ['id', 'title', 'questions']
 
 class ModuleSerializer(serializers.ModelSerializer):
-    """
-    Serializes a Module, nesting EITHER its Lessons OR its Quiz
-    based on the module_type.
-    """
     lessons = LessonSerializer(many=True, read_only=True) 
-    quiz = QuizSerializer(read_only=True) # This will be null if it's a CONTENT module
+    quiz = QuizSerializer(read_only=True)
+    
+    # --- NEW FIELDS FOR LOCKING LOGIC ---
+    is_locked = serializers.SerializerMethodField()
+    is_completed = serializers.SerializerMethodField()
 
     class Meta:
         model = Module
-        # Added 'module_type' and 'quiz'
-        fields = ['id', 'title', 'order', 'module_type', 'lessons', 'quiz']
+        fields = ['id', 'title', 'order', 'module_type', 'lessons', 'quiz', 'is_locked', 'is_completed']
+
+    def get_is_completed(self, obj):
+        """Checks if the current user has completed this module."""
+        user = self.context.get('request').user
+        if not user or not user.is_authenticated:
+            return False
+        return UserProgress.objects.filter(user=user, module=obj, is_completed=True).exists()
+
+    def get_is_locked(self, obj):
+        """
+        Determines if the module is locked.
+        Locked if the *previous* module is not completed.
+        """
+        user = self.context.get('request').user
+        if not user or not user.is_authenticated:
+            return True # Lock everything for guests
+        
+        # Admin bypass
+        if hasattr(user, 'profile') and user.profile.role == 'ADMIN':
+            return False
+
+        # 1. First module is always unlocked
+        if obj.order == 1:
+            return False
+
+        # 2. Find the immediately preceding module
+        prev_module = Module.objects.filter(
+            course=obj.course, 
+            order__lt=obj.order
+        ).order_by('-order').first()
+
+        # If no previous module exists (edge case), it's unlocked
+        if not prev_module:
+            return False
+
+        # 3. Check if previous module is completed
+        is_prev_done = UserProgress.objects.filter(
+            user=user, 
+            module=prev_module, 
+            is_completed=True
+        ).exists()
+
+        return not is_prev_done
 
 class CourseDetailSerializer(serializers.ModelSerializer):
     """
     The main serializer for the entire course structure.
-    This will automatically pick up the changes from ModuleSerializer.
+    Includes modules, lessons, and the calculated Average Rating.
     """
     modules = ModuleSerializer(many=True, read_only=True) 
     creator_username = serializers.CharField(source='created_by.username', read_only=True)
+    average_rating = serializers.SerializerMethodField()
 
     class Meta:
         model = Course
@@ -102,45 +153,35 @@ class CourseDetailSerializer(serializers.ModelSerializer):
             'title', 
             'status', 
             'creator_username', 
+            'average_rating', 
             'modules'
         ]
+
+    def get_average_rating(self, obj):
+        aggregate = obj.reviews.aggregate(Avg('rating'))
+        avg = aggregate['rating__avg']
+        return round(avg, 1) if avg else 0
 
 # =====================================================================
 #  WRITEABLE SERIALIZERS (For Admin Editor)
 # =====================================================================
 
 class ModuleWriteSerializer(serializers.ModelSerializer):
-    """
-    Simple serializer for CREATING/UPDATING a Module.
-    """
     class Meta:
         model = Module
-        # Added 'module_type'
         fields = ['id', 'course', 'title', 'order', 'module_type']
 
 class LessonWriteSerializer(serializers.ModelSerializer):
-    """
-    Simple serializer for CREATING/UPDATING a Lesson.
-    """
     class Meta:
         model = Lesson
-        # MCQ fields are now removed
         fields = ['id', 'module', 'title', 'content', 'video_id', 'order']
 
-# --- NEW ---
 class QuizWriteSerializer(serializers.ModelSerializer):
-    """
-    Simple serializer for CREATING/UPDATING a Quiz.
-    """
     class Meta:
         model = Quiz
         fields = ['id', 'module', 'title']
 
-# --- NEW ---
 class QuestionWriteSerializer(serializers.ModelSerializer):
-    """
-    Simple serializer for CREATING/UPDATING a Question.
-    """
     class Meta:
         model = Question
         fields = ['id', 'quiz', 'question_text', 'options', 'correct_answer', 'order']
