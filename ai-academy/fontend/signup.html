@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CourseCraft | Sign Up</title>
+    <style>
+        body {
+            font-family: "Inter", sans-serif;
+            background-color: #0e0e10;
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .modal-content {
+            background: #1c1c20;
+            padding: 2rem;
+            border-radius: 1rem;
+            width: 350px;
+            box-shadow: 0 0 20px rgba(255,255,255,0.05);
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        label {
+            display: block;
+            margin-bottom: .5rem;
+            font-weight: 500;
+            color: #a1a1aa;
+        }
+        input {
+            width: 100%;
+            padding: .7rem;
+            border: 1px solid #3f3f46;
+            border-radius: .5rem;
+            background: #2a2a2f;
+            color: #fff;
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+        input:focus {
+            outline: none;
+            border-color: #4f46e5;
+        }
+        .btn {
+            width: 100%;
+            padding: .8rem;
+            background: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: .5rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 1rem;
+        }
+        .btn:hover {
+            background: #4338ca;
+        }
+        .switch-modal {
+            text-align: center;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+            color: #a1a1aa;
+        }
+        .switch-modal a {
+            color: #818cf8;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .switch-modal a:hover {
+            text-decoration: underline;
+        }
+        #message {
+            text-align: center;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            padding: .5rem;
+            border-radius: .5rem;
+            display: none; /* Hide by default */
+        }
+    </style>
+</head>
+<body>
+
+    <div class="modal-content">
+        <h2>Create Your Account</h2>
+        <p id="message"></p>
+        <form id="signup-form">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" name="username" placeholder="Choose a username" required>
+            </div>
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" name="email" placeholder="Enter your email" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" placeholder="Create a strong password" required>
+            </div>
+            <button type="submit" class="btn">Create Account</button>
+        </form>
+        <div class="switch-modal">
+            Already have an account? <a href="login.html">Sign in</a>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('signup-form');
+        const messageElement = document.getElementById('message');
+
+        form.addEventListener('submit', async (event) => {
+            event.preventDefault(); // Prevent default form submission
+
+            const username = form.elements.username.value;
+            const email = form.elements.email.value;
+            const password = form.elements.password.value;
+            messageElement.style.display = 'none'; // Hide previous messages
+
+            try {
+                const response = await fetch('http://localhost:8000/api/register/', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, email, password }),
+                });
+
+                const data = await response.json();
+                messageElement.style.display = 'block'; // Show the message element
+
+                if (response.ok) {
+                    messageElement.style.color = '#22c55e'; // Green for success
+                    messageElement.style.background = '#16a34a33';
+                    messageElement.textContent = data.message;
+                    
+                    alert('Registration successful! Redirecting to login page...');
+                    
+                    setTimeout(() => {
+                        window.location.href = 'login.html';
+                    }, 1500);
+
+                } else {
+                    messageElement.style.color = '#f87171'; // Red for error
+                    messageElement.style.background = '#991b1b33';
+                    // Nicely format the error message
+                    let errorText = 'Registration failed. ';
+                    if (data.username) errorText += `Username: ${data.username.join(' ')}`;
+                    if (data.email) errorText += `Email: ${data.email.join(' ')}`;
+                    if (data.password) errorText += `Password: ${data.password.join(' ')}`;
+                    messageElement.textContent = errorText;
+                }
+            } catch (error) {
+                messageElement.style.display = 'block';
+                messageElement.style.color = '#f87171';
+                messageElement.style.background = '#991b1b33';
+                messageElement.textContent = 'An error occurred. Please try again.';
+                console.error('Error:', error);
+            }
+        });
+    </script>
+
+</body>
+</html>

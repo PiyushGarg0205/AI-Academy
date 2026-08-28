@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - CourseCraft</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        /* ===============================================
+           CSS VARIABLES & GLOBAL STYLES
+           =============================================== */
+        :root {
+          --bg-primary: #02021e;
+          --bg-card: rgba(255, 255, 255, 0.05);
+          --bg-card-hover: rgba(255, 255, 255, 0.08);
+          --text-primary: #ffffff;
+          --text-secondary: rgba(255, 255, 255, 0.8);
+          --text-muted: rgba(255, 255, 255, 0.6);
+          --border-color: rgba(255, 255, 255, 0.1);
+          --border-hover: #6366f1;
+          --nav-bg: rgba(10, 10, 15, 0.85);
+          --accent-gradient: linear-gradient(135deg, #c41af3, #4800f0);
+          --success-color: #22c55e;
+          --error-color: #ef4444;
+        }
+        [data-theme="light"] {
+          --bg-primary: #ffffff;
+          --bg-card: #f8f9ff;
+          --text-primary: #1a1a1a;
+          --text-secondary: #404040;
+          --border-color: rgba(0, 0, 0, 0.1);
+          --nav-bg: rgba(255, 255, 255, 0.85);
+        }
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: "Inter", sans-serif; background: var(--bg-primary); color: var(--text-primary); line-height: 1.6; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 0 20px; }
+
+        /* ===============================================
+           HEADER, NAVIGATION & BUTTONS
+           =============================================== */
+        nav { position: fixed; top: 0; width: 100%; z-index: 1000; background: var(--nav-bg); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border-color); }
+        .nav-container { display: flex; align-items: center; justify-content: space-between; padding: 1rem 2rem; }
+        .logo { display: flex; align-items: center; gap: 0.5rem; font-size: 1.5rem; font-weight: 800; text-decoration: none; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .logo-box { background: linear-gradient(135deg, #9d00ff, #6200ff); border-radius: 15px; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; color: white; }
+        .nav-center { display: flex; }
+        .nav-links { display: flex; list-style: none; gap: 1.5rem; }
+        .nav-links a { color: var(--text-secondary); text-decoration: none; font-weight: 500; }
+        .nav-items, .nav-actions { display: flex; align-items: center; gap: 1.5rem; }
+        .btn { padding: 0.75rem 1.5rem; border-radius: 8px; font-weight: 600; border: none; cursor: pointer; text-decoration: none; }
+        .btn-secondary { background: var(--bg-card); color: var(--text-primary); border: 1px solid var(--border-color); }
+        .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+        .theme-toggle { display: flex; align-items: center; gap: 0.5rem; }
+        .toggle-switch { position: relative; width: 50px; height: 25px; background: var(--bg-card); border-radius: 25px; border: 1px solid var(--border-color); cursor: pointer; }
+        .toggle-slider { position: absolute; top: 2px; left: 2px; width: 19px; height: 19px; background: linear-gradient(135deg, #6366f1, #8b5cf6); border-radius: 50%; transition: transform 0.3s ease; }
+        [data-theme="light"] .toggle-slider { transform: translateX(25px); }
+
+        /* ===============================================
+           DASHBOARD & COURSE CARD STYLES
+           =============================================== */
+        .dashboard-main { padding: 120px 0 5rem; min-height: 100vh; }
+        .dashboard-header { margin-bottom: 2.5rem; }
+        .dashboard-header h1 { font-size: 2.5rem; font-weight: 700; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .course-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 1.5rem; }
+        .course-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 15px; padding: 1.5rem; cursor: pointer; transition: all 0.3s ease; display: flex; flex-direction: column; }
+        .course-card:hover { transform: translateY(-5px); border-color: var(--border-hover); background: var(--bg-card-hover); }
+        .course-card h3 { font-size: 1.25rem; margin-bottom: 0.5rem; }
+        .course-card p { color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 1.5rem; flex-grow: 1; }
+        .course-meta { display: flex; justify-content: space-between; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid var(--border-color); padding-top: 1rem; margin-top: auto; }
+        .course-meta span { display: flex; align-items: center; gap: 0.3rem; }
+
+        /* ===============================================
+           INTERACTIVE LEARNING INTERFACE
+           =============================================== */
+        .learning-interface { display: none; grid-template-columns: 320px 1fr; gap: 2rem; }
+        .course-sidebar { background: var(--bg-card); border-radius: 15px; padding: 1.5rem; border: 1px solid var(--border-color); height: fit-content; position: sticky; top: 100px; }
+        .course-sidebar h3 { font-size: 1.25rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; }
+        .module-header { font-weight: 600; padding: 0.75rem; border-radius: 8px; cursor: pointer; display: flex; justify-content: space-between; align-items: center; }
+        .module-header i { transition: transform 0.3s ease; }
+        .lesson-list { list-style: none; padding-left: 1rem; max-height: 0; overflow: hidden; transition: max-height 0.3s ease-out; }
+        .module.active .lesson-list { max-height: 500px; }
+        .module.active .module-header i { transform: rotate(180deg); }
+        .lesson-list-item a { display: block; padding: 0.6rem 0.75rem; color: var(--text-secondary); text-decoration: none; border-radius: 6px; font-size: 0.95rem; }
+        .lesson-list-item.active a { background: var(--accent-gradient); color: white; font-weight: 500; }
+        .lesson-content-area { background: var(--bg-card); border-radius: 15px; padding: 2rem 2.5rem; border: 1px solid var(--border-color); }
+        .course-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2rem; }
+        #lesson-title { font-size: 2.25rem; font-weight: 700; margin-bottom: 0; }
+        .course-actions a { display: inline-flex; align-items: center; gap: 0.5rem; }
+        .video-container { position: relative; padding-bottom: 56.25%; height: 0; border-radius: 10px; margin-bottom: 2rem; background: #000; }
+        .video-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        .text-content { margin-top: 2rem; line-height: 1.8; color: var(--text-secondary); }
+        #mcq-container { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 15px; padding: 2rem; margin-top: 2rem; }
+        #mcq-question { font-size: 1.25rem; font-weight: 600; margin-bottom: 1.5rem; }
+        #mcq-options { display: flex; flex-direction: column; gap: 1rem; margin-bottom: 1.5rem; }
+        .mcq-option { display: flex; align-items: center; background: var(--bg-card-hover); border: 1px solid var(--border-color); border-radius: 10px; padding: 1rem 1.2rem; cursor: pointer; transition: all 0.2s ease; }
+        .mcq-option:hover { border-color: var(--border-hover); transform: translateY(-2px); }
+        .mcq-option input[type="radio"] { margin-right: 1rem; -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border: 2px solid var(--border-hover); border-radius: 50%; background-color: var(--bg-primary); cursor: pointer; position: relative; flex-shrink: 0; }
+        .mcq-option input[type="radio"]:checked { background: var(--accent-gradient); border-color: transparent; }
+        .mcq-option input[type="radio"]:checked::before { content: ''; display: block; width: 8px; height: 8px; background-color: var(--text-primary); border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+        .mcq-option label { flex-grow: 1; cursor: pointer; font-size: 1.05rem; color: var(--text-secondary); }
+        #mcq-feedback { margin-top: 1.5rem; padding: 1rem; border-radius: 10px; font-weight: 600; text-align: center; display: none; }
+        #mcq-feedback.correct { background-color: rgba(34, 197, 94, 0.15); color: var(--success-color); border: 1px solid var(--success-color); }
+        #mcq-feedback.incorrect { background-color: rgba(239, 68, 68, 0.15); color: var(--error-color); border: 1px solid var(--error-color); }
+        .lesson-navigation { display: flex; justify-content: space-between; margin-top: 2.5rem; border-top: 1px solid var(--border-color); padding-top: 1.5rem; }
+        
+        /* ===============================================
+           FOOTER
+           =============================================== */
+        .footer { background: var(--bg-card); color: var(--text-secondary); padding: 4rem 2rem; margin-top: 4rem; }
+        .footer-container { display: grid; grid-template-columns: 2fr 1fr; gap: 3rem; }
+        .footer-left h2 { font-size: 2rem; margin-bottom: 1rem; background: var(--accent-gradient); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .footer-right ul { list-style: none; }
+        .footer-right li { margin-bottom: 0.8rem; }
+        .footer-right a { text-decoration: none; color: var(--text-secondary); }
+        .footer-bottom { text-align: center; margin-top: 2rem; border-top: 1px solid var(--border-color); padding-top: 1rem; font-size: 0.9rem; }
+        /* Add these rules to your <style> block */
+
+.nav-links a {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-weight: 500;
+    padding: 0.2rem 0; /* Adds space for the underline */
+    position: relative; /* Required for the pseudo-element */
+}
+
+.nav-links a.active-nav, .nav-links a:hover {
+    color: var(--text-primary);
+}
+
+/* This creates the hidden underline */
+.nav-links a::after {
+    content: "";
+    position: absolute;
+    width: 0;
+    height: 2px;
+    bottom: -2px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--accent-gradient);
+    transition: width 0.3s ease-out;
+}
+
+/* This makes the underline appear on hover or when the link is active */
+.nav-links a:hover::after, .nav-links a.active-nav::after {
+    width: 100%;
+}
+    </style>
+</head>
+<body>
+    
+    <header>
+      <nav>
+        <div class="nav-container container">
+          <a href="index.html" class="logo" aria-label="CourseCraft Home">
+            <div class="logo-box">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="currentColor" d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44a2.5 2.5 0 0 1-2.96-3.08a3 3 0 0 1-.34-5.58a2.5 2.5 0 0 1 1.32-4.24a2.5 2.5 0 0 1 1.98-3A2.5 2.5 0 0 1 9.5 2Zm5 0A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44a2.5 2.5 0 0 0 2.96-3.08a3 3 0 0 0 .34-5.58a2.5 2.5 0 0 0-1.32-4.24a2.5 2.5 0 0 0-1.98-3A2.5 2.5 0 0 0 14.5 2Z"/></svg>
+            </div>
+            <span>CourseCraft</span>
+          </a>
+          <div class="nav-center">
+            <ul class="nav-links">
+                <li><a href="student-dashboard.html" class="active-nav">My Courses</a></li>
+                <li><a href="profile.html">Profile</a></li>
+            </ul>
+          </div>
+          <div class="nav-items">
+            <div class="theme-toggle">
+              <span class="theme-icon">🌙</span>
+              <button class="toggle-switch" type="button" ><span class="toggle-slider"></span></button>
+              <span class="theme-icon">☀️</span>
+            </div>
+            <div class="nav-actions">
+                <button class="btn btn-secondary" onclick="handleLogout()">Logout</button>
+            </div>
+          </div>
+        </div>
+      </nav>
+    </header>
+
+    <main class="dashboard-main container">
+        <div id="course-list-view">
+            <div class="dashboard-header"><h1>Available Courses</h1></div>
+            <div id="published-courses" class="course-list"><p>Loading available courses...</p></div>
+        </div>
+    
+        <div id="course-viewer" class="learning-interface">
+            <aside class="course-sidebar">
+                <h3 id="course-title-sidebar">Course Content</h3>
+                <div id="module-list"></div>
+            </aside>
+            <section class="lesson-content-area">
+                <div id="lesson-viewer-content">
+                    <div class="course-header">
+                        <h2 id="lesson-title"></h2>
+                        <div class="course-actions">
+                            <a id="reviews-link" href="#" class="btn btn-secondary"><i class="fas fa-star"></i> See Reviews</a>
+                        </div>
+                    </div>
+                    <div id="video-container"></div>
+                    <div id="text-content"></div>
+                    <div id="mcq-container">
+                        <form id="mcq-form">
+                            <p id="mcq-question"></p>
+                            <div id="mcq-options"></div>
+                            <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Check Answer</button>
+                        </form>
+                        <p id="mcq-feedback"></p>
+                    </div>
+                </div>
+                <div class="lesson-navigation">
+                    <button id="prev-lesson-btn" class="btn btn-secondary">Previous Lesson</button>
+                    <button id="next-lesson-btn" class="btn btn-secondary">Next Lesson</button>
+                </div>
+            </section>
+        </div>
+    </main>
+    
+    <footer class="footer">
+        <div class="footer-container container">
+            <div class="footer-left">
+                <h2>About CourseCraft</h2>
+                <p>An AI-powered platform to transform knowledge into engaging courses.</p>
+            </div>
+            <div class="footer-right">
+                <ul>
+                    <li><a href="#">FAQ</a></li>
+                    <li><a href="#">Terms of Use</a></li>
+                    <li><a href="#">Privacy Policy</a></li>
+                </ul>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>© 2025 CourseCraft. All Rights Reserved.</p>
+        </div>
+    </footer>
+
+    <script src="app.js" defer></script>
+<script>
+
+  // ===== LOGOUT FUNCTION (unchanged) =====
+  function handleLogout() {
+    if (confirm("Are you sure you want to log out?")) {
+      localStorage.clear();
+      window.location.href = 'index.html';
+    }
+  }
+</script>
+
+</body>
+</html>
